@@ -20,6 +20,7 @@ if ( mysqli_connect_errno() ) {
 
 function update_userinfo($field, $userid, $newvalue) {
 	// Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+	global $con;
 	if ($stmt = $con->prepare('UPDATE `userinfo` SET `?` = "?" WHERE `userinfo`.`id` = ?')) {
 		// Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
 		$stmt->bind_param('ssi', $field, $newvalue, $userid);
@@ -27,13 +28,14 @@ function update_userinfo($field, $userid, $newvalue) {
 		// Store the result so we can check if the account exists in the database.
 		$stmt->store_result();
 		if ($stmt->num_rows > 0) {
-			$response = ["status" => '200', "response" => '41'];		
+			$response = ["status" => '200', "response" => '41'];
+			return $response;		
 		} else {
 			$response = ["status" => '200', "response" => '42'];
-			exit (json_encode($response));
+			return (json_encode($response));
 		}
 
-		exit (json_encode($response));
+		return (json_encode($response));
 		$stmt->close();
 	}
 }
@@ -56,18 +58,25 @@ if ($_POST["set_function"] == 0) {
 	}
 
 	$obj = json_decode($_POST['data']);
-
+	$response;
+	
 	if(!isset(obj["id"])) {
-		$response = ["status" => '200', "response" => '41'];	
+		$response = ["status" => '200', "response" => '41'];
+		exit (json_encode($response));	
 	}
 
 	if(isset(obj["name"])) {
-		update_userinfo("name", obj["name"], $_POST["id"]);
+		$response = update_userinfo("name", obj["name"], $_POST["id"]);
+		if($response["response"] != 41) {
+			exit (json_encode($response));	
+		}
 	}
 
 	if(isset(obj["surname"])) {
 		
 	}
+
+	exit (json_encode($response));	
 }
 
 ?>
