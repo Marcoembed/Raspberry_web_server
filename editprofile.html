@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Edit Profile</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+  </div>
+  
+  <!-- Navbar -->
+  <div id="navbar_container"></div>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <div id="sidebar_container"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Edit Profile</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Edit Profile</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">General Information</h3>
+
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="inputName">Name</label>
+                <input type="text" id="profile_name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputName">Surname</label>
+                <input type="text" id="profile_surname" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputName">Username</label>
+                <input type="text" id="profile_username" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputName">Email</label>
+                <input type="text" id="profile_email" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputStatus">Role</label>
+                <select id="inputStatus" class="form-control custom-select">
+                  <option disabled="">SA</option>
+                  <option disabled="">CA</option>
+                  <option id="CO_option">CO</option>
+                  <option id="USR_option">USR</option>
+                  <!-- <option selected="">USR</option> -->
+                </select>
+              </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <div class="col-md-6">
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Budget</h3>
+
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="inputEstimatedBudget">Estimated budget</label>
+                <input type="number" id="inputEstimatedBudget" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputSpentBudget">Total amount spent</label>
+                <input type="number" id="inputSpentBudget" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputEstimatedDuration">Estimated project duration</label>
+                <input type="number" id="inputEstimatedDuration" class="form-control">
+              </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          <!-- /.card -->
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+					<button type="button" class="btn btn-success float-right" id="save_changes" data-toggle="modal" data-target="#modal-xl">
+						Save Changes
+					</button>
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+	
+	<div class="modal fade" id="modal-xl">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Confirm Edit</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="show_changes">
+					<p id="noEdit">No Edit Found</p>
+					<p id="name_change_notification">Name will be modified from <b id="oldName"></b> to <b id="newName"></b></p>
+					<p id="surname_change_notification">Surname will be modified from <b id="oldSurname"></b> to <b id="newSurname"></b></p>
+					<p id="username_change_notification">Username will be modified from <b id="oldUsername"></b> to <b id="newUsername"></b></p>
+					<p id="email_change_notification">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
+				</div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="save_changes_confirm">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+  <!-- /.content-wrapper -->
+
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-block">
+      <b>Version</b> 3.2.0
+    </div>
+    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="../../plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="../../dist/js/adminlte.min.js"></script>
+<script>
+  $(document).ready(function(){
+        $("#sidebar_container").load("sidebar_CA.html");
+        $("#navbar_container").load("navbar_CA.html");
+
+				$("#noEdit").hide();
+				$("#email_change_notification").hide();
+
+        $.urlParam = function(name){
+          var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+          if (results==null){
+            return null;
+          }
+          else{
+            return results[1] || 0;
+          }
+        }
+
+        var userInformation = new Array();
+
+        if($.urlParam('id') != null) {
+          $.post("get_info.php", 
+          { 
+            info_id: "3",
+            id: $.urlParam('id')
+          },
+          
+          function(data, status) {
+            obj = JSON.parse(data);
+            if (obj.status == 200) {
+              if (obj.response == 8) {
+                if (obj.data) {
+                  userInformation["name"] = obj.data.name;
+                  $("#profile_name").val(obj.data.name);
+                  userInformation["surname"] = obj.data.surname;
+                  $("#profile_surname").val(obj.data.surname);
+                  userInformation["username"] = obj.data.username;
+                  $("#profile_username").val(obj.data.username);
+                  userInformation["email"] = obj.data.email;
+                  $("#profile_email").val(obj.data.email);
+                  userInformation["role"] = obj.data.role;
+                  if (obj.data.role == "USR") {
+                    $('#USR_option').attr('selected', '');
+                  } else if (obj.data.role == "CO") {
+                    $('#CO_option').attr('selected', '');
+                  } else {
+                    alert("This should not happen");
+                  }
+                }
+              } else if (obj.response == 5) {
+                alert("You are not loggedin.");
+                window.location.href = 'login.html';
+              } else if (obj.response == 7) {
+                alert("Error while intersecating information into the DB");
+              } else if (obj.response == 31) {
+                alert("You do not have the permission to see this page with the current settings (ERR-31)");
+              } else if (obj.response == 32) {
+                alert("You do not have the permission to see this page with the current settings (ERR-32)");
+              } else if (obj.response == 33) {
+                alert("Database Error (ERR-33)");
+              } else {
+                alert("Error 1");
+              }
+            } else {
+              alert("Error 2");
+            }
+          });
+          
+          $("#save_changes").click(function(){
+						var changed = 0;
+						if (userInformation["name"] != $("#profile_name").val()) {
+							if (changed == 0) {
+								$("#noEdit").hide();
+								$("#save_changes_confirm").removeAttr('disabled');
+								changed = 1;
+							}
+							$("#name_change_notification").show();
+							$("#oldName").text(userInformation["name"]);
+							$("#newName").text($("#profile_name").val());
+						} else {
+							$("#name_change_notification").hide();
+						}
+						if (userInformation["surname"] != $("#profile_surname").val()) {
+							if (changed == 0) {
+								$("#noEdit").hide();
+								$("#save_changes_confirm").removeAttr('disabled');
+								changed = 1;
+							}
+							$("#surname_change_notification").show();
+							$("#oldSurname").text(userInformation["surname"]);
+							$("#newSurname").text($("#profile_surname").val());
+						} else {
+							$("#surname_change_notification").hide();
+						}
+						if (userInformation["username"] != $("#profile_username").val()) {
+							if (changed == 0) {
+								$("#noEdit").hide();
+								$("#save_changes_confirm").removeAttr('disabled');
+								changed = 1;
+							}
+							$("#username_change_notification").show();
+							$("#oldUsername").text(userInformation["username"]);
+							$("#newUsername").text($("#profile_username").val());
+						} else {
+							$("#username_change_notification").hide();
+						}
+						if (userInformation["email"] != $("#profile_email").val()) {
+							if (changed == 0) {
+								$("#noEdit").hide();
+								$("#save_changes_confirm").removeAttr('disabled');
+								changed = 1;
+							}
+							$("#email_change_notification").show();
+							$("#oldEmail").text(userInformation["email"]);
+							$("#newEmail").text($("#profile_email").val());
+						} else {
+							$("#email_change_notification").hide();
+						}
+						
+						if (changed == 0) {
+							$("#noEdit").show();
+							$("#save_changes_confirm").attr('disabled', '');
+						}
+        	});
+
+					$("#save_changes_confirm").click(function(){
+						var changed = 0;
+						var data = {};
+						if (userInformation["name"] != $("#profile_name").val()) {
+							changed = 1;
+							data["name"] = $("#profile_name").val();
+						} else {
+							delete data["name"];
+						}
+						if (userInformation["surname"] != $("#profile_surname").val()) {
+							changed = 1;
+							data["surname"] = $("#profile_surname").val();
+						} else {
+							delete data["surname"];
+						}
+						if (userInformation["username"] != $("#profile_username").val()) {
+							changed = 1;
+							data["username"] = $("#profile_username").val();
+						} else{
+							delete data["username"];
+						}
+						if (userInformation["email"] != $("#profile_email").val()) {
+							changed = 1;
+							data["email"] = $("#profile_email").val();
+						} else {
+							delete data["email"];
+						}
+						
+						if (changed == 0) {
+							alert("This should not happen");
+						} else {
+							$.post("set_info.php", 
+          		{ 
+            		set_function: "0",
+								id: $.urlParam('id'),
+            		data: JSON.stringify(data) 
+          		},
+          
+          		function(data, status) {
+          
+							});
+						}
+        	});
+        }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Dashboard Customer Administrator</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+  <!-- iCheck -->
+  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- JQVMap -->
+  <link rel="stylesheet" href="plugins/jqvmap/jqvmap.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
+  <!-- summernote -->
+  <link rel="stylesheet" href="plugins/summernote/summernote-bs4.min.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+  </div>
+
+  <!-- Navbar -->
+  <div id="navbar_container"></div>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <div id="sidebar_container"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0" id="business_name">[Loading..]</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3>Loading..</h3>
+
+                <p>Worker On Site</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-clipboard"></i>
+              </div>
+              <!-- <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3>Loading..</h3>
+
+                <p>Not On Site</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-stats-bars"></i>
+              </div>
+              <!-- <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-warning">
+              <div class="inner">
+                <h3>Loading..</h3>
+
+                <p>Total Workers</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-person-add"></i>
+              </div>
+              <!-- <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
+            </div>
+          </div>
+          <!-- ./col -->
+          <div class="col-lg-3 col-6">
+            <!-- small box -->
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3>Loading..</h3>
+
+                <p>Visitors</p>
+              </div>
+              <div class="icon">
+                <i class="ion ion-pie-graph"></i>
+              </div>
+              <!-- <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
+            </div>
+          </div>
+          <!-- ./col -->
+        </div>
+        <!-- /.row -->
+        <!-- Main row -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Logs</h3>
+                <div class="card-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search" disabled>
+
+                    <div class="input-group-append">
+                      <button type="submit" class="btn btn-default" disabled>
+                        <i class="fas fa-search"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body table-responsive p-0" style="height: 300px;" id="ListAccesses">
+                <table class="table table-head-fixed text-nowrap">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Username</th>
+                      <th>Date</th>
+                      <th>Area</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+          </div>  
+        </div>
+        <div class="row mb-2">
+          <div class="col-sm-8">
+            <h4>Add/Edit/View Users</h4>
+          </div>
+          <div class="col-sm-2 mb-2">
+            <a href="addprofile.html">
+            <button type="button" class="btn btn-success btn-block"><i class="ion ion-person-add"></i> Add User</button>
+            </a>
+          </div>
+          <div class="col-sm-2">
+              <div class="input-group input-group">
+                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" disabled>
+
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-default" disabled>
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="card card-solid">
+              <div class="card-body pb-0">
+                <div class="row" id="show_workers">
+                  
+                </div>
+              </div>
+              <!-- /.card-body -->
+              <div class="card-footer">
+                <nav aria-label="Contacts Page Navigation">
+                  <ul class="pagination justify-content-center m-0" id="workes_page_navigation">
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <!-- <li class="page-item"><a class="page-link" href="#">2</a></li> -->
+                  </ul>
+                </nav>
+              </div>
+              <!-- /.card-footer -->
+            </div>
+          </div>
+        </div>
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  <footer class="main-footer">
+    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+    All rights reserved.
+    <div class="float-right d-none d-sm-inline-block">
+      <b>Version</b> 3.2.0
+    </div>
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- ChartJS -->
+<script src="plugins/chart.js/Chart.min.js"></script>
+<!-- Sparkline -->
+<script src="plugins/sparklines/sparkline.js"></script>
+<!-- JQVMap -->
+<script src="plugins/jqvmap/jquery.vmap.min.js"></script>
+<script src="plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+<!-- jQuery Knob Chart -->
+<script src="plugins/jquery-knob/jquery.knob.min.js"></script>
+<!-- daterangepicker -->
+<script src="plugins/moment/moment.min.js"></script>
+<script src="plugins/daterangepicker/daterangepicker.js"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- Summernote -->
+<script src="plugins/summernote/summernote-bs4.min.js"></script>
+<!-- overlayScrollbars -->
+<script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.js"></script>
+<!-- Login Script -->
+<script>
+  $(document).ready(function(){
+        $("#sidebar_container").load("sidebar_CA.html");
+        $("#navbar_container").load("navbar_CA.html");
+
+        $.post("get_info.php", 
+        { 
+          info_id: "5",
+          role: "CA"
+        },
+        
+        function(data, status) {
+          obj = JSON.parse(data);
+          if (obj.status == 200) {
+            if (obj.response == 35) {
+              
+            } else if (obj.response == 34) {
+              alert("You have NOT the permission to be here.");
+            } else if (obj.response == 5) {
+              alert("You are not loggedin.");
+              window.location.href = 'login.html';
+            } else if (obj.response == 7) {
+              alert("Error while intersecating information into the DB");
+            } else {
+              alert("Error 1");
+            }
+          } else {
+            alert("Error 2");
+          }
+        });
+
+        $.post("get_info.php", 
+        { 
+          info_id: "1",
+        },
+        
+        function(data, status) {
+          obj = JSON.parse(data);
+          if (obj.status == 200) {
+            if (obj.response == 8) {
+              if (obj.data) {
+                $.each( obj.data, function( key, value ) {
+                  data = obj.data[key];
+                  data_len = obj.data.length;
+                  data_grid = "col-12 col-sm-6 col-md-4";
+                  if (data_len == 1) {
+                    data_grid = "col-12 col-sm-12 col-md-12";
+                  }
+                  if (data_len == 2) {
+                    data_grid = "col-12 col-sm-6 col-md-6";
+                  }
+
+                  $("#show_workers").append
+                  (
+                    '<div class="'+data_grid+' d-flex align-items-stretch flex-column"> \
+                      <div class="card bg-light d-flex flex-fill"> \
+                        <div class="card-header text-muted border-bottom-0"> \
+                          Function not implemented \
+                        </div> \
+                        <div class="card-body pt-0"> \
+                          <div class="row"> \
+                            <div class="col-7"> \
+                              <h2 class="lead"><b>'+data["username"]+'</b></h2> \
+                              <p class="text-muted text-sm"><b>About: </b> Function not implemented </p> \
+                              <ul class="ml-4 mb-0 fa-ul text-muted"> \
+                                <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> Address: Function not implemented</li> \
+                                <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span> Phone #: Function not implemented</li> \
+                              </ul> \
+                            </div> \
+                            <div class="col-5 text-center"> \
+                              <img src="../../dist/img/user1-128x128.jpg" alt="user-avatar" class="img-circle img-fluid"> \
+                            </div> \
+                          </div> \
+                        </div> \
+                        <div class="card-footer"> \
+                          <div class="text-right"> \
+                            <a href="editprofile.html?id='+data["id"]+'" class="btn btn-sm btn-danger"> \
+                              <i class="fas fa-user-edit"></i> Edit Profile \
+                            </a> \
+                            <a href="viewprofile.html?id='+data["id"]+'" class="btn btn-sm btn-primary"> \
+                              <i class="fas fa-user"></i> View Profile \
+                            </a> \
+                          </div> \
+                        </div> \
+                      </div> \
+                    </div>'
+                  );
+                });
+              } else {
+                alert("No workes found..");
+              }
+            } else if (obj.response == 5) {
+              alert("You are not loggedin.");
+              window.location.href = 'login.html';
+            } else if (obj.response == 7) {
+              alert("Error while intersecating information into the DB");
+            } else {
+              alert("Error 1");
+            }
+          } else {
+            alert("Error 2");
+          }
+        });
+
+        $.post("get_info.php", 
+        { 
+          info_id: "0",
+        },
+        
+        function(data, status) {
+          obj = JSON.parse(data);
+          if (obj.status == 200) {
+            if (obj.response == 8) {
+              if (obj.data) {
+                $.each( obj.data, function( key, value ) {
+                  data = obj.data[key];
+                  $("#ListAccesses tbody").append("<tr>"+
+                    "<td>"+data["id"]+"</td>"+
+                    "<td>"+data["PersonID"]+"</td>"+
+                    "<td>"+data["Time"]+"</td>"+
+                    "<td>"+data["Area"]+"</td>"+
+                    "<td>"+data["action"]+"</td>"+
+                    "</tr>");
+                });
+              }
+            } else if (obj.response == 5) {
+              alert("You are not loggedin.");
+              window.location.href = 'login.html';
+            } else if (obj.response == 7) {
+              alert("Error while intersecating information into the DB");
+            } else {
+              alert("Error 1");
+            }
+          } else {
+            alert("Error 2");
+          }
+        });
+
+        $.post("get_info.php", 
+        { 
+          info_id: "4",
+        },
+        
+        function(data, status) {
+          obj = JSON.parse(data);
+          if (obj.status == 200) {
+            if (obj.response == 8) {
+              if (obj.business_name) {
+                $("#business_name").text("["+obj.business_name+"] Dashboard - Customer Administrator")
+              }
+            } else if (obj.response == 5) {
+              alert("You are not loggedin.");
+              window.location.href = 'login.html';
+            } else if (obj.response == 7) {
+              alert("Error while intersecating information into the DB");
+            } else {
+              alert("Error 1");
+            }
+          } else {
+            alert("Error 2");
+          }
+        });
+  });
+</script>
+</body>
+</html>
