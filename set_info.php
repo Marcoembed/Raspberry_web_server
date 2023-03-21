@@ -18,6 +18,26 @@ if ( mysqli_connect_errno() ) {
 	exit (json_encode($response));
 }
 
+function update_userinfo($field, $userid, $newvalue) {
+	// Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+	if ($stmt = $con->prepare('UPDATE `userinfo` SET `?` = "?" WHERE `userinfo`.`id` = ?')) {
+		// Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+		$stmt->bind_param('ssi', $field, $newvalue, $userid);
+		$stmt->execute();
+		// Store the result so we can check if the account exists in the database.
+		$stmt->store_result();
+		if ($stmt->num_rows > 0) {
+			$response = ["status" => '200', "response" => '41'];		
+		} else {
+			$response = ["status" => '200', "response" => '42'];
+			exit (json_encode($response));
+		}
+
+		exit (json_encode($response));
+		$stmt->close();
+	}
+}
+
 /**
  * Modify user information
  *
@@ -34,19 +54,20 @@ if ($_POST["set_function"] == 0) {
 		$response = ["status" => '200', "response" => '34'];
 		exit (json_encode($response));
 	}
-	// $sql = "";
-	// $result = $con->query($sql);
 
-	// if ($result->num_rows > 0) {
-    //     // output data of each row
-    //     $i = 0;
-    //     while($row = $result->fetch_assoc()) {
-    //         $i++;
-    //     }
-	// } else {
-	// 	$response = ["status" => '200', "response" => '7'];
-	// 	exit (json_encode($response));
-	// }
+	$obj = json_decode($_POST['data']);
+
+	if(!isset(obj["id"])) {
+		$response = ["status" => '200', "response" => '41'];	
+	}
+
+	if(isset(obj["name"])) {
+		update_userinfo("name", obj["name"], $_POST["id"]);
+	}
+
+	if(isset(obj["surname"])) {
+		
+	}
 }
 
 ?>

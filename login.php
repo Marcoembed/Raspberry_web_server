@@ -27,6 +27,10 @@ function password_check($password_try, $password_real) {
 	// 34 = No Permission for this action
 	// 35 = Permission Granted for this action
 
+	// -- set_info.php --
+	// 41 = num_rows > 1
+	// 42 = num_rows == 0
+
 // Check user login or not
 if(isset($_SESSION['loggedin'])){
 	$response = ["status" => '200', "response" => '0'];

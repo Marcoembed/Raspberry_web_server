@@ -338,6 +338,7 @@
 						if (changed == 0) {
 							alert("This should not happen");
 						} else {
+              $("#save_changes_confirm").attr('disabled', '');
 							$.post("set_info.php", 
           		{ 
             		set_function: "0",
@@ -346,8 +347,15 @@
           		},
           
           		function(data, status) {
-          
-							});
+                obj = JSON.parse(data);
+                if (obj.status == 200) {
+                  if (obj.response == 41) {
+                    alert("num_rows > 1");
+                  } else if (obj.response == 42) {
+                    alert("num_rows == 0");
+                  }
+                }
+              });
 						}
         	});
         }
