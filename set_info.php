@@ -1,43 +1,20 @@
 <?php
 include "config_db.php";
 include "functions.php";
+require "databaseManager.php";
 session_start();
-$response = ["status" => '200', "response" => '8'];
+$response = ["code" => '48']; // Set the response to OK
 
 // Check user login or not
 if(!isset($_SESSION['loggedin'])){
-	$response = ["status" => '200', "response" => '5'];
+	$response = ["code" => '5']; // Set the response to "User not Logged In"
 	exit (json_encode($response));
 }
 
-// Try and connect using the info above.
-$con = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
-if ( mysqli_connect_errno() ) {
-	// If there is an error with the connection, stop the script and display the error.
-	$response = ["status" => '200', "response" => '2'];
-	exit (json_encode($response));
-}
-
-function update_userinfo($field, $userid, $newvalue) {
-	// Prepare our SQL, preparing the SQL statement will prevent SQL injection.
-	global $con;
-	if ($stmt = $con->prepare('UPDATE `userinfo` SET `?` = "?" WHERE `userinfo`.`id` = ?')) {
-		// Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
-		$stmt->bind_param('ssi', $field, $newvalue, $userid);
-		$stmt->execute();
-		// Store the result so we can check if the account exists in the database.
-		$stmt->store_result();
-		if ($stmt->num_rows > 0) {
-			$response = ["status" => '200', "response" => '41'];
-			return $response;		
-		} else {
-			$response = ["status" => '200', "response" => '42'];
-			return (json_encode($response));
-		}
-
-		return (json_encode($response));
-		$stmt->close();
-	}
+$database = new DatabaseManager();
+if ($database->init() == 2) {
+	$response = ["code" => '2']; // Set the response to "Failed to connect to the Mysql Server"
+	exit (json_encode($response));	
 }
 
 /**
@@ -53,27 +30,23 @@ function update_userinfo($field, $userid, $newvalue) {
 if ($_POST["set_function"] == 0) {
 	
 	if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
-		$response = ["status" => '200', "response" => '34'];
+		$response = ["code" => '34']; // Set the response to "No permission for this action"	
 		exit (json_encode($response));
 	}
 
-	$obj = json_decode($_POST['data']);
-	$response;
-	
-	if(!isset(obj["id"])) {
-		$response = ["status" => '200', "response" => '41'];
+	$obj = json_decode($_POST['data'], true);
+
+	if(!isset($_POST["id"])) {
+		$response = ["code" => '41']; // Set the response to "Update not OK"	
 		exit (json_encode($response));	
 	}
 
-	if(isset(obj["name"])) {
-		$response = update_userinfo("name", obj["name"], $_POST["id"]);
-		if($response["response"] != 41) {
-			exit (json_encode($response));	
+	$response;
+	foreach ($obj as $key => $value) {
+		$response = $database->update_userinfo($key, $_POST["id"], $value);
+		if($response["code"] != 42) {
+			exit (json_encode($response)); // Set the response to "Update not OK"		
 		}
-	}
-
-	if(isset(obj["surname"])) {
-		
 	}
 
 	exit (json_encode($response));	
