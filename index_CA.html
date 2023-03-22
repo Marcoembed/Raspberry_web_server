@@ -200,7 +200,6 @@
                 <nav aria-label="Contacts Page Navigation">
                   <ul class="pagination justify-content-center m-0" id="workes_page_navigation">
                     <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <!-- <li class="page-item"><a class="page-link" href="#">2</a></li> -->
                   </ul>
                 </nav>
               </div>
@@ -292,6 +291,20 @@
           }
         });
 
+        function expandRole(role) {
+          if(role == "USR") {
+            return "User";
+          } else if (role == "CO") {
+            return "Customer Operator";
+          } else if (role == "CA") {
+            return "Customer Administrator"
+          } else if (role == "SA") {
+            return "System Administrator"
+          }
+        }
+
+        var userReceived = [];
+
         $.post("get_info.php", 
         { 
           info_id: "1",
@@ -301,6 +314,13 @@
           obj = JSON.parse(data);
           if (obj.status == 200) {
             if (obj.response == 8) {
+              if (obj.amount > 9) {
+                var iteration = obj.amount/9;
+                for(let i = 2; i < 2 + iteration; i++) {
+                  $("#workes_page_navigation").append
+                  ('<li class="page-item"><a class="page-link" href="#">'+i+'</a></li>')
+                }
+              }
               if (obj.data) {
                 $.each( obj.data, function( key, value ) {
                   data = obj.data[key];
@@ -313,18 +333,20 @@
                     data_grid = "col-12 col-sm-6 col-md-6";
                   }
 
+                  userReceived.push(data);
+
                   $("#show_workers").append
                   (
                     '<div class="'+data_grid+' d-flex align-items-stretch flex-column"> \
                       <div class="card bg-light d-flex flex-fill"> \
                         <div class="card-header text-muted border-bottom-0"> \
-                          Function not implemented \
+                          '+data["name"]+' '+data["surname"]+' \
                         </div> \
                         <div class="card-body pt-0"> \
                           <div class="row"> \
                             <div class="col-7"> \
                               <h2 class="lead"><b>'+data["username"]+'</b></h2> \
-                              <p class="text-muted text-sm"><b>About: </b> Function not implemented </p> \
+                              <p class="text-muted text-sm"><b>Role: </b>'+expandRole(data["role"])+'</p> \
                               <ul class="ml-4 mb-0 fa-ul text-muted"> \
                                 <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> Address: Function not implemented</li> \
                                 <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span> Phone #: Function not implemented</li> \
