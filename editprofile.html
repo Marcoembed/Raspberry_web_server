@@ -149,6 +149,7 @@
 					<p id="surname_change_notification">Surname will be modified from <b id="oldSurname"></b> to <b id="newSurname"></b></p>
 					<p id="username_change_notification">Username will be modified from <b id="oldUsername"></b> to <b id="newUsername"></b></p>
 					<p id="email_change_notification">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
+          <p id="role_change_notification">Role will be modified from <b id="oldRole"></b> to <b id="newRole"></b></p>
 				</div>
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -300,6 +301,20 @@
 						} else {
 							$("#email_change_notification").hide();
 						}
+
+            var newRole = $("#inputStatus option:selected").text();
+            if (userInformation["role"] != newRole) {
+							if (changed == 0) {
+								$("#noEdit").hide();
+								$("#save_changes_confirm").removeAttr('disabled');
+								changed = 1;
+							}
+							$("#role_change_notification").show();
+							$("#oldRole").text(userInformation["role"]);
+							$("#newRole").text(newRole);
+						} else {
+							$("#role_change_notification").hide();
+						}
 						
 						if (changed == 0) {
 							$("#noEdit").show();
@@ -334,7 +349,13 @@
 						} else {
 							delete data["email"];
 						}
-						
+            if (userInformation["role"] != $("#inputStatus option:selected").text()) {
+							changed = 1;
+							data["role"] = $("#inputStatus option:selected").text();
+						} else {
+							delete data["role"];
+						}
+
 						if (changed == 0) {
 							alert("This should not happen");
 						} else {
@@ -348,13 +369,15 @@
           
           		function(data, status) {
                 obj = JSON.parse(data);
-                if (obj.status == 200) {
-                  if (obj.response == 41) {
-                    alert("num_rows > 1");
-                  } else if (obj.response == 42) {
-                    alert("num_rows == 0");
+                // if (obj.status == 200) {
+                  if (obj.code == 41) {
+                    alert("Something went wrong");
+                  } else if (obj.code == 42) {
+                    location.reload();
+                  } else {
+                    alert("Something went wrong (others)");
                   }
-                }
+                // }
               });
 						}
         	});
