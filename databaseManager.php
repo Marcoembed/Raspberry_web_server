@@ -3,7 +3,7 @@
         private $con;
 
         public function init() {
-            require_once 'config_db.php'; 
+            require 'config_db.php'; 
 
             // Try and connect to the DB
             $this->con = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
@@ -63,11 +63,11 @@
         /**
          * Get Role of an User in a Business.
          *
-         * Description.
          *
          * @param int $id           Description.
          * @param int $businessid   Description.
-         * @return array Description.
+         * 
+         * @return int|text If text then return role, int if error
          */
         public function get_role_in_business($id, $businessid) {
             // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
@@ -226,54 +226,100 @@
                     $i++;
                 }
             } else {
-                $response["return"] = 7;
+                $response["return"] = 37;
             }
 
             return $response;
         }
 
         /**
-         * Get CO and USR workers information from business.
+         * Get all workers information from business.
          *
+         * @param int $page If 0, it will return all workers
+         * @param text $role Can be used to filter the workers (For example, "CA" will show only "CA", "CO", "USR")
+         * 
          * @return array check "return" key. If 0 everything is ok, else error code.
          */
-        function get_CO_USR_from_business() {
-            require_once 'functions.php'; 
-            if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
-                $response["return"] = 34;
-                return $response;
+        function get_people_from_business($page) {
+            require_once 'functions.php';
+            
+            $my_userid;
+            if ($_SESSION["playrole"] == 1) {
+                $my_userid = $_SESSION["playrole_id"];
+            } else {
+                $my_userid = $_SESSION["id"];
             }
 
-            $sql = "SELECT `UserID`, `role` FROM `business_people` WHERE `BusinessID` = ".$_SESSION['BusinessId']." AND (`role` = 'CO' OR `role` = 'USR')";
+            $my_role = $this->get_role_in_business($my_userid, $_SESSION["BusinessId"]);
+            if (is_numeric($my_role)) {
+                $response["return"] = $my_role;
+                return $response;
+            }
+            
+            // if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
+            //     $response["return"] = 34;
+            //     return $response;
+            // }
+
+            // if($page == 0) {
+            //     $response["return"] = 36;
+            //     return $response;
+            // }
+
+            switch($my_role) {
+                case "SA" :
+                    $sql2 = "(`role` = 'CO' OR `role` = 'USR' OR `role` = 'CA' OR `role` = 'SA')";
+                    break;
+
+                case "CA":
+                    $sql2 = "(`role` = 'CO' OR `role` = 'USR' OR `role` = 'CA')";
+                    break;
+                
+                case "CO" :
+                    $sql2 = "(`role` = 'CO' OR `role` = 'USR')";
+                    break;
+                
+                case "USR" : 
+                    $response["return"] = 34;
+                    return $response;
+                    break;
+            }
+
+            $sql = "SELECT `UserID`, `role` FROM `business_people` WHERE `BusinessID` = ".$_SESSION['BusinessId']." AND ".$sql2." ORDER BY `role` ASC";
             $result = $this->con->query($sql);
         
             if ($result->num_rows > 0) {
                 // output data of each row
-                $i = 0;
-                while(($row = $result->fetch_assoc()) && $i < 9) {
-                    $sql = "SELECT `username`, `name`, `surname`, `email` FROM `userinfo` WHERE `id` = ".$row['UserID'];
-                    $result2 = $this->con->query($sql);
-                    if ($result2->num_rows > 0) {
-                        $row2 = $result2->fetch_assoc();
-        
-                        $array = [	"username" => $row2["username"], 
-                                    "name" => $row2["name"], 
-                                    "surname" => $row2["surname"], 
-                                    "email" => $row2["email"],
-                                    "id" => $row['UserID'],
-                                    "role" => $row['role']
-                                ];
+                $i = 1;
+                while(($row = $result->fetch_assoc())) {
+                    if ($page == 0 || $i <= $page*9 && $i > ($page-1)*9) {
+                        $sql = "SELECT `username`, `name`, `surname`, `email` FROM `userinfo` WHERE `id` = ".$row['UserID'];
+                        $result2 = $this->con->query($sql);
+                        if ($result2->num_rows > 0) {
+                            $row2 = $result2->fetch_assoc();
+            
+                            $array = [	"username" => $row2["username"], 
+                                        "name" => $row2["name"], 
+                                        "surname" => $row2["surname"], 
+                                        "email" => $row2["email"],
+                                        "id" => $row['UserID'],
+                                        "role" => $row['role']
+                                    ];
 
-                        $response["data"][$i] = $array;
-                        $response["return"] = 0;
-                        $i++;
+                            $response["data"][$i] = $array;
+                            $response["return"] = 0;
+                            $i++;
+                        } else {
+                            $array = [	"username" => null, 
+                                        "name" => null, 
+                                        "surname" => null, 
+                                        "email" => null,
+                                        "id" => null
+                                    ];
+                        }
                     } else {
-                        $array = [	"username" => null, 
-                                    "name" => null, 
-                                    "surname" => null, 
-                                    "email" => null,
-                                    "id" => null
-                                ];
+                        $i++;
+                        continue;
                     }
                 }
                 $response["amount"] = $result->num_rows; 
@@ -290,28 +336,26 @@
          * @return array check "return" key. If 0 everything is ok, else error code.
          */
         function get_username() {
-            require_once 'functions.php'; 
+            require_once 'functions.php';
+            $userid;
+            if ($_SESSION["playrole"] == 1)
+                $userid = $_SESSION["playrole_id"];
+            else
+                $userid = $_SESSION["id"]; 
             
-            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
-            if ($stmt = $this->con->prepare('SELECT username FROM userinfo WHERE id = ?')) {
-                $stmt->bind_param('s', $_SESSION['id']);
-                $stmt->execute();
-                
-                // Store the result so we can check if the account exists in the database.
-                $stmt->store_result();
-                if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($username);
-                    $stmt->fetch();
-                    $response["username"] = $username;
-                    $response["return"] = 0;
-                } else {
-                    // Incorrect username
-                    $response["return"] = 6;
-                }
-                
-                return $response;
-                $stmt->close();
+            $sql = "SELECT username FROM userinfo WHERE id = ".$userid;
+            $result = $this->con->query($sql);
+
+            if ($result->num_rows == 1) {
+                $row = $result->fetch_assoc();
+                $response["username"] = $row["username"];
+                $response["return"] = 0;
+            } else {
+                // User not found into the DB
+                $response["return"] = 6;
             }
+            return $response;
+            $stmt->close();
         }
 
         /**
@@ -327,10 +371,10 @@
                 return $response;
             }
         
-            if(!$this->check_worker_is_CO_or_USR($id, $_SESSION["BusinessId"])) {
-                $response["return"] = 32;
-                return $response;
-            }
+            // if(!$this->check_worker_is_CO_or_USR($id, $_SESSION["BusinessId"])) {
+            //     $response["return"] = 32;
+            //     return $response;
+            // }
             
             $role = $this->get_role_in_business($id, $_SESSION["BusinessId"]);
             if($role == 33) {

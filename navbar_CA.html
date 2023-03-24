@@ -1,3 +1,24 @@
+<style>
+  .outerNote {
+    background: rgb(255, 0, 0);
+  }
+  .innerNote {
+    background: rgb(255, 0, 0);
+    width: 500px;
+    margin: 0 auto;
+    color: #fff
+  }
+</style>
+<div class="outerNote">
+  <div class="innerNote">
+    <p style="margin-bottom: 0">You are currently set as 
+        <b id="playrole_name">Loading..</b> 
+        <b id="playrole_surname">Loading..</b> -
+        <b id="playrole_role">Loading..</b>. Click <b><a href="" id="reset_playrole">here</a></b> to reset.
+    </p>
+  </div>
+</div>
+
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
@@ -5,7 +26,7 @@
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="index_CA.html" class="nav-link">Home</a>
+        <a href="index.html" class="nav-link">Home</a>
       </li>
     </ul>
 
@@ -19,3 +40,66 @@
       </li>
     </ul>
 </nav>
+
+<script>
+  $(document).ready(function(){
+    $(".innerNote").hide();
+        function responseByID(id) {
+          if (id == 5) {
+            alert("You are not loggedin.");
+            window.location.href = 'login.html';
+          } else if (id == 7) {
+            alert("Error while intersecating information into the DB");
+          } else if (id == 34) {
+            alert("You have NOT the permission to be here.");
+          } else {
+            alert("Error 1");
+          }
+        }
+
+        $.post("get_info.php", 
+        { 
+          info_id: 6
+        },
+        
+        function(data, status) {
+          obj = JSON.parse(data);
+          if (obj.status == 200) {
+            if (obj.response == 8) {
+              if (obj.data) {
+                if(obj.data.playrole == 1) {
+                  $(".innerNote #playrole_name").text(obj.data.name);
+                  $(".innerNote #playrole_surname").text(obj.data.surname);
+                  $(".innerNote #playrole_role").text(obj.data.role);
+                  $(".innerNote").show();
+                }
+              } else {
+                alert("Error 1");
+              }
+            } else responseByID(obj.response);
+          } else {
+            alert("Error 2");
+          }
+        });
+
+        $("#reset_playrole").click(function(){
+          $.post("set_info.php", 
+          { 
+            set_function: 2
+          },
+          
+          function(data, status) {
+            obj = JSON.parse(data);
+            if (obj.response == 8) {
+              if (obj.data) {
+                if(obj.data.playrole == 0) {
+                  window.location.href = 'index.html';
+                }
+              } else {
+                alert("Error 1");
+              }
+            } else responseByID(obj.response);
+          });
+        });
+  });
+</script>
