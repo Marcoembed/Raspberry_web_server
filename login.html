@@ -90,6 +90,11 @@
 <!-- Login Script -->
 <script>
   $(document).ready(function(){
+    $(document).on('keypress',function(e) {
+      if(e.which == 13) {
+        $("#login_button").click();
+      }
+    });
     $("#login_button").click(function(){
       var email = $("#email").val();
       var password = $("#password").val();
@@ -106,18 +111,15 @@
           if (obj.status == 200) {
             if (obj.response == 0) {
               alert("Utente già collegato!");
-              window.location.href = 'index_CA.html';
+              window.location.href = 'index.html';
             } else if (obj.response == 1) {
-              //$('input[type="text"]').css({"border":"2px solid red","box-shadow":"0 0 3px red"});
-              //$('input[type="password"]').css({"border":"2px solid #00F5FF","box-shadow":"0 0 5px #00F5FF"});
               alert("Email or Password Field are empty");
             } else if (obj.response == 2) {
               alert("Failed to connect to the Mysql Server");
             } else if (obj.response == 3) {
-              //$('input[type="text"],input[type="password"]').css({"border":"2px solid red","box-shadow":"0 0 3px red"});
               alert("Wrong username or password!");
             } else if (obj.response == 4) {
-              window.location.href = 'index_CA.html';
+              window.location.href = 'index.html';
             } else {
               alert(obj);
             }

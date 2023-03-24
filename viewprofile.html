@@ -159,31 +159,27 @@
             id: $.urlParam('id')
           },
           
-          function(data, status) {
-            obj = JSON.parse(data);
-            if (obj.status == 200) {
-              if (obj.response == 8) {
-                if (obj.data) {
-                  $("#profile_name").val(obj.data.name);
-                  $("#profile_surname").val(obj.data.surname);
-                  $("#profile_username").val(obj.data.username);
-                  $("#profile_email").val(obj.data.email);
-                  $("#profile_role").val(obj.data.role);
-                }
-              } else if (obj.response == 5) {
-                alert("You are not loggedin.");
-                window.location.href = 'login.html';
-              } else if (obj.response == 7) {
-                alert("Error while intersecating information into the DB");
-              } else if (obj.response == 31) {
-                alert("You do not have the permission to see this page with the current settings (ERR-31)");
-              } else if (obj.response == 32) {
-                alert("You do not have the permission to see this page with the current settings (ERR-32)");
-              } else {
-                alert("Error 1");
+          function(data, status, xhr) {
+          obj = JSON.parse(data);
+          if (xhr.status == 200) {
+              if (obj.data) {
+                $("#profile_name").val(obj.data.name);
+                $("#profile_surname").val(obj.data.surname);
+                $("#profile_username").val(obj.data.username);
+                $("#profile_email").val(obj.data.email);
+                $("#profile_role").val(obj.data.role);
               }
+            } else if (obj.response == 5) {
+              alert("You are not loggedin.");
+              window.location.href = 'login.html';
+            } else if (obj.response == 7) {
+              alert("Error while intersecating information into the DB");
+            } else if (obj.response == 31) {
+              alert("You do not have the permission to see this page with the current settings (ERR-31)");
+            } else if (obj.response == 32) {
+              alert("You do not have the permission to see this page with the current settings (ERR-32)");
             } else {
-              alert("Error 2");
+              alert("Error 1");
             }
           });
         }
