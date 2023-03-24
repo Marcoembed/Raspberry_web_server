@@ -167,19 +167,47 @@
          * @return int 1 if OK, otherwise 0.
          */
         function check_worker_is_CO_or_USR($id, $businessid) {
-            if ($stmt = $this->con->prepare('SELECT * FROM `business_people` WHERE `UserID` = ? AND `BusinessID` = ? AND (`role` = "USR" OR `role` = "CO")')) {
-                // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+            if ($stmt = $this->con->prepare('select * from `business_people` where `userid` = ? and `businessid` = ? and (`role` = "usr" or `role` = "co")')) {
+                // bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
                 $stmt->bind_param('ii', $id, $businessid);
                 $stmt->execute();
                 
                 $result = $stmt->get_result();
                 if($result->num_rows === 0) {
-                    // Probably the user is not a USR or CO. 
-                    // We know the user exist because check_worker_belong_to_business() should be called before. 
+                    // probably the user is not a usr or co. 
+                    // we know the user exist because check_worker_belong_to_business() should be called before. 
                     return 0;
                 }
                 else {
                     return 1;
+                }
+                return 0;
+                $stmt->close();
+            }
+        }
+
+        /**
+         * Check if the registration info are already present in the database
+         * 
+         * Description
+         * 
+         * @param int $userinfo Description.
+         * @return int 1 if OK, otherwise 0
+         */
+        public function check_userinfo_registration($userinfo, $uservalue){
+            if ($stmt = $this->con->prepare('select * from userinfo where `'.$userinfo.'` = ?')) {
+                // bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+                $stmt->bind_param('s', $uservalue);
+                $stmt->execute();
+                
+                $stmt->store_result();
+                if($stmt->num_rows === 0) {
+                    // userinfo used for the first time
+                    return 1;
+                }
+                else {
+                    // user already registered in the database
+                    return 0;
                 }
                 return 0;
                 $stmt->close();

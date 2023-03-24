@@ -73,6 +73,30 @@
             </div>
           </div>
         </div>
+        <div class="input-group mb-3">
+          <input type="tel" class="form-control" id="phone_number" placeholder="Phone number">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-regular fa-phone"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="codice_fiscale" placeholder="Codice fiscale">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-regular fa-address-card"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="address" placeholder="Address">
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-solid fa-map"></span>
+            </div>
+          </div>
+        </div>
         <div class="row">
           <div class="col-8">
             <div class="icheck-primary">
@@ -125,9 +149,12 @@
       var email = $("#email").val();
       var password = $("#password").val();
       var password2 = $("#retype_password").val();
+      var codice_fiscale = $("#codice_fiscale").val();
+      var phone_number = $("#phone_number").val();
+      var address = $("#address").val();
       
       // Checking for blank fields.
-      if( name =='' || surname =='' || username == '' || email =='' || password =='' || password2 ==''){
+      if( name =='' || surname =='' || username == '' || email =='' || password =='' || password2 =='' || codice_fiscale ==''){
         alert("Please fill all fields...!!!!!!");
       } else if (password != password2) {
         alert("The two password does not match")
@@ -138,8 +165,11 @@
           surname:    surname,
           username:   username,  
           email:      email, 
-          password:   password,
+          password1:   password,
           password2:  password2,
+          codice_fiscale: codice_fiscale,
+          phone_number: phone_number,
+          address: address,
         },
         
         function(data) {
