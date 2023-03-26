@@ -13,6 +13,46 @@
         }
 
         /**
+         * Add the user information.
+         * 
+         * This function is called when the registration form compiled by the client is sent 
+         * @param text $table Description: table where to insert values
+         * @param text $params Description: params for bind_param 
+         * @param text $userarray Description: array of userinfo passed by the client
+         * @param text $clientinfo Description: userinfo passed by the client
+         * @return 
+         */
+        public function add_userinfo($table, $userarray){
+            $values = implode(", ", $userarray);
+            $n_elements = count($userarray);
+            $params = array();
+            $qmarks_array = array();
+            for($i=0; $i<$n_elements; $i++){
+                array_push($qmarks_array, "?");
+            }
+            $qmarks_string = implode(", ", $qmarks_array);
+            foreach ($userarray as $name) {
+                if (isset($_POST[$name]) && $_POST[$name] != '') {
+                    $params[$name] = $_POST[$name];
+                }
+            }
+            if (count($params)) {
+                $query = "INSERT INTO $table ($values) VALUES ($qmarks_string)";
+            }
+            if ($stmt = $this->con->prepare($query)) {
+                $params = array_merge(array(str_repeat('s', count($params))), array_values($params));
+                call_user_func_array(array(&$stmt, 'bind_param'), $params);
+                $stmt->execute();
+                echo 'You have successfully registered! You can now login!';
+                return 1;
+            } else {
+                // Something is wrong with the SQL statement, so you must check to make sure your accounts table exists with all 3 fields.
+                echo 'Could not prepare statement!';
+                return 0;
+            }
+        }
+
+        /**
          * Update the user information.
          *
          * This function is intedded to be called by a CA user.

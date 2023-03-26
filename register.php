@@ -23,8 +23,8 @@ session_start();
 	// reg14 = address doesn't met the constraints
 	// reg15 = passwords do not match
 	// reg16 = Successfully Registered
-	// reg17 = -- User not logged in
-	// reg18 = -- No User ID found
+	// reg17 = Registration failed
+	// reg18 = No User ID found
 	// reg19 = Error while intersecting information in the database
 	// reg20 = Messagge contains information
 
@@ -61,7 +61,7 @@ if  (   !isset(
 	$_POST['surname'],
 	$_POST['email'],
 	$_POST['username'],
-	$_POST['password1'],
+	$_POST['password'],
 	$_POST['password2'],
 	$_POST['codice_fiscale'],
 	$_POST['phone_number'],
@@ -81,16 +81,16 @@ $client_info = array(
 	$_POST['name'],
 	$_POST['surname'],
 	$_POST['username'],
-	$_POST['password1'],
+	$_POST['password'],
 	$_POST['email'],
 	$_POST['codice_fiscale'],
 	$_POST['phone_number'],
 	$_POST['address'] 
 );
 
-// comparison check between password1 and password2
+// comparison check between password and password2
 
-if(!password_comparison($_POST['password1'], $_POST['password2'])){
+if(!password_comparison($_POST['password'], $_POST['password2'])){
 	echo 'passwords do not match';
 	$response = ["status" => '200', "response" => 'reg12'];
 	exit (json_encode($response));
@@ -146,6 +146,28 @@ foreach($checkuserinfo as $i=>$value){
 		}
 	}
 }
+
+/* insert userinfo passed by the client in the database */
+
+$insert_userinfo= array(
+	"name",
+	"surname",
+	"username",
+	"password",
+	"email",
+	"codice_fiscale"
+);
+
+$return = $database->add_userinfo('userinfo',$insert_userinfo);
+	if ($return == 0){
+		$response = ["status" => '200', "response" => 'reg'.$i+17];
+		echo "error";
+		exit (json_encode($response));
+	} else {
+		$response = ["status" => '200', "response" => '0'];
+		echo "ok";
+	}
+
 exit (json_encode($response));
 
 ?>
