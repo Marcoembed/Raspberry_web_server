@@ -26,10 +26,15 @@ function password_check($password_try, $password_real) {
 	// 33 = Error while intersecting information in the database
 	// 34 = No Permission for this action
 	// 35 = Permission Granted for this action
+	// 36 = Passed wrong data
+	// 37 = No Logs Found
 
 	// -- set_info.php --
-	// 41 = num_rows > 1
-	// 42 = num_rows == 0
+	// 41 = Update non OK
+	// 42 = Update OK
+	// 43 = Error while intersecting information in the database (1)
+	// 44 = Error while intersecting information in the database (2)
+	// 48 = OK
 
 // Check user login or not
 if(isset($_SESSION['loggedin'])){
@@ -72,6 +77,9 @@ if ($stmt = $con->prepare('SELECT id, password FROM userinfo WHERE email = ?')) 
 			
 			$_SESSION['BusinessId']	= 1;
 			$_SESSION['role'] 		= "CA";
+			
+			$_SESSION['playrole']	= 0;
+			// $_SESSION['playrole_id'] = 2;
 			
 			$response = ["status" => '200', "response" => '4'];
 			

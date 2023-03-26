@@ -210,44 +210,40 @@
             id: $.urlParam('id')
           },
           
-          function(data, status) {
+          function(data, status, xhr) {
             obj = JSON.parse(data);
-            if (obj.status == 200) {
-              if (obj.response == 8) {
-                if (obj.data) {
-                  userInformation["name"] = obj.data.name;
-                  $("#profile_name").val(obj.data.name);
-                  userInformation["surname"] = obj.data.surname;
-                  $("#profile_surname").val(obj.data.surname);
-                  userInformation["username"] = obj.data.username;
-                  $("#profile_username").val(obj.data.username);
-                  userInformation["email"] = obj.data.email;
-                  $("#profile_email").val(obj.data.email);
-                  userInformation["role"] = obj.data.role;
-                  if (obj.data.role == "USR") {
-                    $('#USR_option').attr('selected', '');
-                  } else if (obj.data.role == "CO") {
-                    $('#CO_option').attr('selected', '');
-                  } else {
-                    alert("This should not happen");
-                  }
+            if (xhr.status == 200) {
+              if (obj.data) {
+                userInformation["name"] = obj.data.name;
+                $("#profile_name").val(obj.data.name);
+                userInformation["surname"] = obj.data.surname;
+                $("#profile_surname").val(obj.data.surname);
+                userInformation["username"] = obj.data.username;
+                $("#profile_username").val(obj.data.username);
+                userInformation["email"] = obj.data.email;
+                $("#profile_email").val(obj.data.email);
+                userInformation["role"] = obj.data.role;
+                if (obj.data.role == "USR") {
+                  $('#USR_option').attr('selected', '');
+                } else if (obj.data.role == "CO") {
+                  $('#CO_option').attr('selected', '');
+                } else {
+                  alert("This should not happen");
                 }
-              } else if (obj.response == 5) {
-                alert("You are not loggedin.");
-                window.location.href = 'login.html';
-              } else if (obj.response == 7) {
-                alert("Error while intersecating information into the DB");
-              } else if (obj.response == 31) {
-                alert("You do not have the permission to see this page with the current settings (ERR-31)");
-              } else if (obj.response == 32) {
-                alert("You do not have the permission to see this page with the current settings (ERR-32)");
-              } else if (obj.response == 33) {
-                alert("Database Error (ERR-33)");
-              } else {
-                alert("Error 1");
               }
+            } else if (obj.response == 5) {
+              alert("You are not loggedin.");
+              window.location.href = 'login.html';
+            } else if (obj.response == 7) {
+              alert("Error while intersecating information into the DB");
+            } else if (obj.response == 31) {
+              alert("You do not have the permission to see this page with the current settings (ERR-31)");
+            } else if (obj.response == 32) {
+              alert("You do not have the permission to see this page with the current settings (ERR-32)");
+            } else if (obj.response == 33) {
+              alert("Database Error (ERR-33)");
             } else {
-              alert("Error 2");
+              alert("Error 1");
             }
           });
           

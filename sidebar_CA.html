@@ -31,6 +31,14 @@
               </p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="play_any_role.html" class="nav-link">
+              <i class="nav-icon fas fa-user"></i>
+              <p>
+                Play Any Role
+              </p>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -48,21 +56,17 @@
         
         function(data, status) {
           obj = JSON.parse(data);
-          if (obj.status == 200) {
-            if (obj.response == 8) {
-              if(obj.username) {
-                $("#username_sidebar").text(obj.username);
-              }
-            } else if (obj.response == 5) {
-              alert("You are not loggedin.");
-              window.location.href = 'login.html';
-            } else if (obj.response == 7) {
-              alert("Error while intersecating information into the DB");
-            } else {
-              alert("Error 1");
+          if (obj.response == 8) {
+            if(obj.username) {
+              $("#username_sidebar").text(obj.username);
             }
+          } else if (obj.response == 5) {
+            alert("You are not loggedin.");
+            window.location.href = 'login.html';
+          } else if (obj.response == 7) {
+            alert("Error while intersecating information into the DB");
           } else {
-            alert("Error 2");
+            alert("Error 1");
           }
         });
   });

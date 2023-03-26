@@ -52,4 +52,43 @@ if ($_POST["set_function"] == 0) {
 	exit (json_encode($response));	
 }
 
+/**
+ * Set user playrole
+ *
+ * This function should be called by a CA or SA
+ *
+ */
+if ($_POST["set_function"] == 1) {
+	
+	if(!isset($_POST["id"])) {
+		http_response_code(401);
+		exit;
+	}
+
+	$response;
+	$_SESSION["playrole"] = 1;
+	$_SESSION["playrole_id"] = $_POST["id"];
+
+	http_response_code(200);
+	exit;
+}
+
+/**
+ * Reset user playrole
+ *
+ * This function should be called by a CA or SA
+ *
+ */
+if ($_POST["set_function"] == 2) {
+	
+	$response;
+	$_SESSION["playrole"] = 0;
+	$_SESSION["playrole_id"] = 0;
+	
+	$response["data"]["playrole"] = 0;
+	$response["response"] = 8;
+
+	exit (json_encode($response));	
+}
+
 ?>
