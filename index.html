@@ -80,6 +80,10 @@
 <!-- Login Script -->
 <script>
   $(document).ready(function(){
+    $("#sidebar_container").load("sidebar_CA.html");
+    $("#navbar_container").load("navbar_CA.html");
+    $("#footbar_container").load("footer.html");
+    
     $.post("get_info.php", 
       { 
           info_id: "7"
@@ -91,9 +95,12 @@
             if (obj.response == 8) {
               if(obj.role == "CA") {
                 $("#content-wrapper").load("index_CA.html");
-                $("#sidebar_container").load("sidebar_CA.html");
-                $("#navbar_container").load("navbar_CA.html");
-                $("#footbar_container").load("footer.html");
+              }
+              if(obj.role == "CO") {
+                $("#content-wrapper").load("index_CO.html");
+              }
+              if(obj.role == "USR") {
+                $("#content-wrapper").load("index_USR.html");
               }
             } else responseByID(obj.response);
         } else {
