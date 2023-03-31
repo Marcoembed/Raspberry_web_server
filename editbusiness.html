@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Edit Business</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
+    <!-- daterange picker -->
+  <link rel="stylesheet" href="../../plugins/daterangepicker/daterangepicker.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<!-- Site wrapper -->
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+  </div>
+  
+  <!-- Navbar -->
+  <div id="navbar_container"></div>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <div id="sidebar_container"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Edit Business</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Edit Business</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Business Information</h3>
+
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="business_name">Business Name</label>
+                <input type="text" id="business_name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="business_vat">Business VAT</label>
+                <input type="text" id="business_vat" class="form-control">
+              </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+              <div class="col-12">
+					      <button disabled type="button" class="btn btn-success float-right" id="save_changes" data-toggle="modal" data-target="#modal-xl">
+						      Save Changes
+					      </button>
+              </div>
+            </div>
+            <!-- /.card-footer -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <div class="col-md-6">
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Edit Area Information</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div classV="form-group">
+                <label for="select_building">Select a Business Building</label>
+                <select id="select_building" class="form-control custom-select">
+                  <option number="0" selected></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="select_building_area">Select an Area to Modify</label>
+                <select id="select_building_area" class="form-control custom-select">
+                  <option number="0" selected></option>
+                </select>
+              </div>
+              <div id="area_fields" style="display: none;">
+                <div class="form-group">
+                  <label>Name</label>
+                  <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">@</span>
+                    </div>
+                    <input type="text" id="area_name" class="form-control">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+              <div class="col-12">
+					      <button disabled type="button" class="btn btn-success float-right" id="save_changes" data-toggle="modal" data-target="#modal-xl">
+						      Save Changes
+					      </button>
+              </div>
+            </div>
+            <!-- /.card-footer -->
+          </div>
+          <!-- /.card -->
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Add Business Building</h3>
+
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="add_business_building_name">Business Building Name</label>
+                <input type="text" id="add_business_building_name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="add_business_building_address">Business Building Address</label>
+                <input type="text" id="add_business_building_address" class="form-control">
+              </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+              <div class="col-12">
+					      <button disabled type="button" class="btn btn-success float-right" id="add_building" data-toggle="modal" data-target="#modal-add-building">
+						      Add Building
+					      </button>
+              </div>
+            </div>
+            <!-- /.card-footer -->
+          </div>
+          <!-- /.card -->
+        </div>
+        <div class="col-md-6">
+          <div class="card card-secondary">
+            <div class="card-header">
+              <h3 class="card-title">Add Business Building Area </h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            
+            </div>
+            <!-- /.card-footer -->
+          </div>
+          <!-- /.card -->
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+	
+	<div class="modal fade" id="modal-xl">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Confirm Edit</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="show_changes">
+					<p id="noEdit">No Edit Found</p>
+					<p id="name_change_notification">Name will be modified from <b id="oldName"></b> to <b id="newName"></b></p>
+					<p id="surname_change_notification">Surname will be modified from <b id="oldSurname"></b> to <b id="newSurname"></b></p>
+					<p id="username_change_notification">Username will be modified from <b id="oldUsername"></b> to <b id="newUsername"></b></p>
+					<p id="email_change_notification">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
+          <p id="role_change_notification">Role will be modified from <b id="oldRole"></b> to <b id="newRole"></b></p>
+				</div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="save_changes_confirm">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	
+  <div class="modal fade" id="modal-add-building">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Confirm Add</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+          <div class="col-12">
+            <div class="alert alert-warning alert-dismissible">
+              <h5><i class="icon fas fa-exclamation-triangle"></i> Alert!</h5>
+              <p>Page will be reloaded after confirm.</p>
+            </div>
+            <div class="row">
+              <p>
+                Building with Name <b id="new_building_name"></b> 
+                and Address <b id="new_building_address"></b> 
+                will be added to your business. Are you sure?
+              </p>
+            </div>
+          </div>
+				</div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="add_building_confirm">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+  <!-- /.content-wrapper -->
+
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-block">
+      <b>Version</b> 3.2.0
+    </div>
+    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="../../plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- InputMask -->
+<script src="../../plugins/moment/moment.min.js"></script>
+<script src="../../plugins/inputmask/jquery.inputmask.min.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.js"></script>
+
+<script>
+  $(document).ready(function(){
+    $("#sidebar_container").load("sidebar_CA.html");
+    $("#navbar_container").load("navbar_CA.html");
+
+    $.urlParam = function(name){
+      var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+      if (results==null){
+        return null;
+      }
+      else{
+        return results[1] || 0;
+      }
+    }
+    
+    // This function is used to retrieve the information related to the business
+    //var businessInformation = new Array();
+    var businessInformation = {
+      name: "",
+      VAT: 0,
+      building : new Array
+    };
+
+    $.post("get_info.php", 
+    { 
+      info_id: "8",
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+        if (obj.data) {
+          businessInformation["name"] = obj.data.name;
+          $("#business_name").val(obj.data.name);
+          businessInformation["VAT"] = obj.data.VAT;
+          $("#business_vat").val(obj.data.VAT);
+          if (obj.data.building) {
+              $.each( obj.data.building, function( key, value ) {
+                data = obj.data.building[key];
+                businessInformation["building"][key] = {building_name: data["building_name"], areas: new Array()};
+                $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+              });
+          }
+        }
+      } else responseByID(obj.response);
+    });
+
+    $('#select_building').change(function(){ 
+      $("#select_building_area").empty();
+      $("#select_building_area").append('<option number="0"></option>');
+
+      var building_id = $("#select_building option:selected" ).attr("number");
+      if (building_id == 0) {
+        $("#area_fields").hide(); 
+
+      } else {
+        $.post("get_info.php", 
+        { 
+          info_id: "9",
+          building_id: building_id
+        },
+    
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            obj = JSON.parse(data);
+            if (obj.data) {
+                $.each( obj.data, function( key, value ) {
+                  data = obj.data[key];
+                  businessInformation["building"][building_id]["areas"][key] = {area_name : data["name"]};
+                  $("#select_building_area").append('<option number="'+key+'">'+data["name"]+'</option>');
+                });
+              
+            }
+          } else responseByID(obj.response);
+        });
+      }
+    });
+    
+    $('#select_building_area').change(function(){
+      $("#area_fields").show(); 
+      var area_id = $("#select_building_area option:selected" ).attr("number");
+      var building_id = $("#select_building option:selected" ).attr("number");
+      
+      if (area_id == 0) {
+        $("#area_fields").hide();
+      } else {
+        $("#area_name").val(businessInformation["building"][building_id]["areas"][area_id]["area_name"]);
+        $.post("get_info.php", 
+        { 
+          info_id:      "10",
+          building_id:  building_id,
+          area_id:      area_id
+        },
+    
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            obj = JSON.parse(data);
+            if (obj.data) {
+            
+            }
+          } else responseByID(obj.response);
+        });
+      }
+    });
+    
+    $("button#add_building").click(function(){
+      //alert("You clicked!");
+      var new_building_name     = $("#add_business_building_name").val();
+      var new_building_address  = $("#add_business_building_address").val();
+      $("b#new_building_name").text(new_building_name);
+      $("b#new_building_address").text(new_building_address);
+    });
+
+    $('#add_business_building_name, #add_business_building_address').on('input',function(e){
+      var new_building_name     = $("#add_business_building_name").val();
+      var new_building_address  = $("#add_business_building_address").val();
+      if (new_building_name != "" && new_building_address != "") {
+        $("button#add_building").removeAttr('disabled');
+      } else {
+        $("button#add_building").attr('disabled', '');
+      }
+    });
+    
+    $("button#add_building_confirm").click(function(){
+      $("button#add_building_confirm").attr('disabled', '');
+      var new_building_name     = $("#add_business_building_name").val();
+      var new_building_address  = $("#add_business_building_address").val();
+        
+      $.post("set_info.php", 
+        { 
+          set_function      : "4",
+          building_name     : new_building_name,
+          building_address  : new_building_address
+        },
+    
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            obj = JSON.parse(data);
+            location.reload();  
+          } else responseByID(obj.response);
+        });
+    });
+  });
+</script>
+</body>
+</html>

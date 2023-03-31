@@ -32,7 +32,26 @@ if ($_POST["info_id"] == 0) {
 
 // Show CO/USR in the Workers Table in the Customer Administrator Dashboard
 if ($_POST["info_id"] == 1) {
-	$return = $database->get_people_from_business($_POST["page"]);
+	$filter; $filter_building;
+	if ($_POST["filter"] !== null && !empty($_POST["filter"])) {
+		if ($_POST["filter_building"] !== null && !empty($_POST["filter_building"])) {
+			$filter = $_POST["filter"];
+			$filter_building = $_POST["filter_building"];
+		} else {
+			$filter = $_POST["filter"];
+			$filter_building = 0;
+		}
+	} else {
+		if ($_POST["filter_building"] !== null && !empty($_POST["filter_building"])) {
+			$filter = "";
+			$filter_building = $_POST["filter_building"];
+		} else {
+			$filter = "";
+			$filter_building = 0;
+		}
+	}
+	
+	$return = $database->get_people_from_business($_POST["page"], $filter, $filter_building);
 
 	if ($return["return"] == 0) {
 		http_response_code(200);
@@ -63,7 +82,13 @@ if ($_POST["info_id"] == 2) {
 // API used by the viewprofile page
 // API also used by editprofile page
 if ($_POST["info_id"] == 3) {
-	$return = $database->get_user_information($_POST["id"]);
+	$id;
+	if ($_POST["id"] == 0) {
+		$id = $_SESSION["id"];
+	} else {
+		$id = $_POST["id"];
+	}
+	$return = $database->get_user_information($id);
 
 	if ($return["return"] == 0) {
 		http_response_code(200);
@@ -141,6 +166,40 @@ if ($_POST["info_id"] == 7) {
 	} else {
 		http_response_code(200);
 		$response["response"] = $information;
+		exit (json_encode($response));
+	}
+}
+
+// API used by the editbusiness page
+if ($_POST["info_id"] == 8) {
+	$my_business = $_SESSION["BusinessId"];
+	
+	$return = $database->get_business_info($my_business);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = ["data" => $return["data"]];
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// API used by the editbusiness page
+if ($_POST["info_id"] == 9) {
+	$my_business = $_SESSION["BusinessId"];
+	
+	$return = $database->get_business_areas($my_business, $_POST["building_id"]);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = ["data" => $return["data"]];
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
 		exit (json_encode($response));
 	}
 }

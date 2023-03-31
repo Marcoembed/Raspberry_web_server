@@ -91,4 +91,38 @@ if ($_POST["set_function"] == 2) {
 	exit (json_encode($response));	
 }
 
+/**
+ * Remove an user from a business
+ *
+ *
+ */
+if ($_POST["set_function"] == 3) {
+	$return["response"] = $database->remove_user_from_business($_POST["id"]);
+
+	if ($return["response"] == 42) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
+/**
+ * Create a new building for the current business
+ *
+ *
+ */
+if ($_POST["set_function"] == 4) {
+	$return["response"] = $database->create_new_building($_POST["building_name"], $_POST["building_address"]);
+
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
 ?>
