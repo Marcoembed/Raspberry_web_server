@@ -86,60 +86,64 @@
     <!-- Main row -->
     <div class="row">
         <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-            <h3 class="card-title">Logs</h3>
-            <div class="card-tools">
-                <div class="input-group input-group-sm" style="width: 150px;">
-                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" disabled>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Logs</h3>
+                    <div class="card-tools">
+                        <!-- <div class="input-group input-group-sm" style="width: 150px;">
+                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" disabled>
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-default" disabled>
+                                <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body table-responsive p-0" style="height: 300px;" id="ListAccesses">
+                <table class="table table-head-fixed text-nowrap">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Date</th>
+                        <th>Area</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+        </div>  
+    </div>
+    <div class="row mb-2">
+        <div class="col-12">
+            <h4>Add/Edit/View Users</h4>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-sm-6" style="text-align: right;">
+            <label>Search by Building and/or Name Surname </label>
+        </div>
+        <div class="col-sm-4 mb-4">
+            <select id="select_building" class="form-control select2" style="width: 100%;">
+              <option selected="selected" number="0"></option>
+            </select>
+        </div>
+        <div class="col-sm-2">
+            <div class="input-group input-group">
+                <input type="text" id="search_workes" class="form-control float-right" placeholder="Search">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-default" disabled>
                     <i class="fas fa-search"></i>
                     </button>
                 </div>
-                </div>
             </div>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body table-responsive p-0" style="height: 300px;" id="ListAccesses">
-            <table class="table table-head-fixed text-nowrap">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Date</th>
-                    <th>Area</th>
-                    <th>Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-            </div>
-            <!-- /.card-body -->
         </div>
-        </div>  
-    </div>
-    <div class="row mb-2">
-        <div class="col-sm-10">
-        <h4>Add/Edit/View Users</h4>
-        </div>
-        <div class="col-sm-2 mb-2">
-        <a href="addprofile.html">
-        <button type="button" class="btn btn-success btn-block"><i class="ion ion-person-add"></i> Add User</button>
-        </a>
-        </div>
-        <!-- <div class="col-sm-2">
-            <div class="input-group input-group">
-            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" disabled>
-
-            <div class="input-group-append">
-                <button type="submit" class="btn btn-default" disabled>
-                <i class="fas fa-search"></i>
-                </button>
-            </div>
-            </div>
-        </div> -->
     </div>
     <div class="row">
         <div class="col-12">
@@ -165,38 +169,99 @@
 </section>
 <!-- /.content -->
 
+<div class="modal fade" id="modal-xl">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Confirm Remove User from Business</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="show_remove_info">
+				<p id="user_remove_notification">User <b id="user_remove_name"></b> will be removed from the business.</p>
+			</div>
+			<div class="modal-footer justify-content-between">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-danger" id="save_remove_action">Remove User</button>
+			</div>
+	    </div>
+	    <!-- /.modal-content -->
+    </div>
+	<!-- /.modal-dialog -->
+</div>
+
+<div class="modal fade" id="modal-add-user">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Add new user to the Business</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="show_remove_info">
+                <div class="row">
+				    <p>
+                        You can add an user by either writing the username or the CF.
+                    </p>
+                </div>
+                <div class="row">
+                    <p>
+                        The user will receive a notification and can accept o refuse the invite.
+                    </p>
+                </div>
+                <div class="row">
+                    <p>
+                        You can also specify the role of the new user in the current business (USR - CO - CA).
+                    </p>
+                </div>
+                <div class="row">
+                    <p>
+                        You will not be informed about the existence of the user. Please read carefully the data before submit.
+                    </p>
+                </div>
+                <div class="row">
+                    <div class="form-group col-4">
+                      <label for="adduser_username">Username</label>
+                      <input type="text" id="adduser_username" class="form-control">
+                    </div>
+                    <div class="form-group col-8">
+                      <label for="adduser_CF">CF</label>
+                      <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="adduser_CF">
+                      </div>
+                    </div>
+                </div>
+			</div>
+			<div class="modal-footer justify-content-between">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-success" id="add_user">Add User</button>
+			</div>
+	    </div>
+	    <!-- /.modal-content -->
+    </div>
+	<!-- /.modal-dialog -->
+</div>
+
 <script>
-    $(document).ready(function(){
-
-        $.post("get_info.php", 
-        { 
-            info_id: "5",
-            role: "CA"
-        },
-        
-        function(data, status, xhr) {
-            if (xhr.status == 200) {
-            
-            } else {
-                alert("You do not have the permission to see this page.");
-            }
-        });
-
         var userReceived = [];
-
         function showWorkers(obj) {
             $.each( obj.data, function( key, value ) {
                 data = obj.data[key];
                 data_len = obj.data.length;
                 data_grid = "col-12 col-sm-6 col-md-4";
                 if (data_len == 1) {
-                data_grid = "col-12 col-sm-12 col-md-12";
+                    data_grid = "col-12 col-sm-12 col-md-12";
                 }
                 if (data_len == 2) {
-                data_grid = "col-12 col-sm-6 col-md-6";
+                    data_grid = "col-12 col-sm-6 col-md-6";
                 }
 
-                userReceived.push(data);
+                userReceived[data["id"]] = data;
 
                 $("#show_workers").append
                 (
@@ -222,7 +287,10 @@
                     </div> \
                     <div class="card-footer"> \
                         <div class="text-right"> \
-                        <a href="editprofile.html?id='+data["id"]+'" class="btn btn-sm btn-danger"> \
+					    <button type="button" class="btn btn-sm btn-danger" id="remove_user" number='+data["id"]+' data-toggle="modal" data-target="#modal-xl"> \
+                            <i class="fas fa-user-slash"></i> Remove Profile \
+					    </button> \
+                        <a href="editprofile.html?id='+data["id"]+'" class="btn btn-sm btn-warning"> \
                             <i class="fas fa-user-edit"></i> Edit Profile \
                         </a> \
                         <a href="viewprofile.html?id='+data["id"]+'" class="btn btn-sm btn-primary"> \
@@ -235,30 +303,92 @@
                 );
             });
         }
+        
+        function sendRequest_getWorkes(page_number, filter, filter_building) {
+            // Request a new page in the show workes section
+            
+            var pageNumber = page_number;
+        
+            $.post("get_info.php", 
+            { 
+                info_id: 1,
+                page: pageNumber,
+                filter: filter,
+                filter_building: filter_building
+            },
+            
+            function(data, status, xhr) {
+                $("#show_workers").empty();
+                $("#workes_page_navigation").empty();
+                obj = JSON.parse(data);
+                if (xhr.status == 200) {
+                    var iteration = obj.amount/9;
+                    if (iteration == 0)
+                        iteration = 1;
+                        
+                    var found = 0;
+                    for(let i = 1; i < 1 + iteration; i++) {
+                        if (i == pageNumber) {
+                            found = 1;
+                            $("#workes_page_navigation").append
+                            ('<li class="page-item active" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
+                        } else
+                            $("#workes_page_navigation").append
+                            ('<li class="page-item" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
+                        if(found == 0) {
+                            $("#workes_page_navigation [number="+Math.ceil(iteration)+"]").addClass("active");
+                        }
+                    }
+                    
+                    if (obj.data) {
+                        showWorkers(obj);
+                    } else {
+                        //alert("No workes found..");
+                    }
+                } else responseByID(obj.response);
+            });
+        }
+
+    $(document).ready(function(){
 
         $.post("get_info.php", 
         { 
-            info_id: 1,
-            page: 1
+            info_id: "5",
+            role: "CA",
+            filter: ""
         },
         
         function(data, status, xhr) {
             if (xhr.status == 200) {
-                obj = JSON.parse(data);
-                if (obj.amount > 9) {
-                    var iteration = obj.amount/9;
-                    for(let i = 1; i < 1 + iteration; i++) {
-                    $("#workes_page_navigation").append
-                    ('<li class="page-item" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
-                    }
-                    $("#page_number[number=1]").addClass("active");
-                }
-                if (obj.data) {
-                    showWorkers(obj);
-                } else {
-                    alert("No workes found..");
-                }
-            } else responseByID(obj.response);
+            
+            } else {
+                alert("You do not have the permission to see this page.");
+            }
+        });
+
+        sendRequest_getWorkes(1, "", 0);
+        
+        $(document).on('click', "#page_number", function(){
+            var building_id = $("#select_building option:selected" ).attr("number");
+            var pageNumber = $(this).attr('number');
+            sendRequest_getWorkes(pageNumber, $('#search_workes').val(), building_id);
+        });
+
+        $('#search_workes').on('input', function() {
+            var building_id = $("#select_building option:selected" ).attr("number");
+            
+            $("#show_workers .card > .overlay").remove();
+            $("#show_workers .card").append(
+            '<div class="overlay" id="lol"> \
+                <i class="fas fa-3x fa-sync-alt"></i> \
+            </div>'
+            );
+            sendRequest_getWorkes(1, $('#search_workes').val(), building_id);
+        });
+    
+        $('#select_building').change(function(){ 
+            var building_id = $("#select_building option:selected" ).attr("number");
+            sendRequest_getWorkes(1, $('#search_workes').val(), building_id);
         });
 
         $.post("get_info.php", 
@@ -299,40 +429,59 @@
             } else responseByID(obj.response);
         });
 
-        $(document).on('click', "#page_number", function(){
-            var pageNumber = $(this).attr('number');
-            $("#show_workers").empty();
-            $("#workes_page_navigation").empty();
+
+        var userToBeRemoved;
         
-            $.post("get_info.php", 
+        $(document).on('click', "#remove_user", function(){
+            var userid = $(this).attr('number');
+            userToBeRemoved = userid;
+            $("#user_remove_name").text(userReceived[userid]["name"]+" "+userReceived[userid]["surname"]);
+        });
+        
+        $(document).on('click', "#save_remove_action", function(){
+            $("#save_remove_action").attr("disabled", '');    
+            //$('#modal-xl').modal('hide')
+            $.post("set_info.php", 
             { 
-                info_id: 1,
-                page: pageNumber
+                set_function: 3,
+                id: userToBeRemoved
             },
             
             function(data, status, xhr) {
-                obj = JSON.parse(data);
                 if (xhr.status == 200) {
-                    if (obj.amount > 9) {
-                        var iteration = obj.amount/9;
-                        for(let i = 1; i < 1 + iteration; i++) {
-                            if (i == pageNumber)
-                            $("#workes_page_navigation").append
-                            ('<li class="page-item active" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
-                        
-                            else
-                            $("#workes_page_navigation").append
-                            ('<li class="page-item" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
-                        }
-                    }
-                    
-                    if (obj.data) {
-                        showWorkers(obj);
-                    } else {
-                        alert("No workes found..");
-                    }
-                } else responseByID(obj.response);
+                    $('#modal-xl').modal('hide');
+                    location.reload();
+                } else {
+                    obj = JSON.parse(data);
+                    responseByID(obj.response);
+                }
             });
         });
+
+    var businessInformation = {
+      building : new Array
+    };
+
+    $.post("get_info.php", 
+    { 
+      info_id: "8",
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+        if (obj.data) {
+          if (obj.data.building) {
+              $.each( obj.data.building, function( key, value ) {
+                data = obj.data.building[key];
+                businessInformation["building"][key] = {building_name: data["building_name"]};
+                $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+              });
+          }
+        }
+      } else responseByID(obj.response);
+    });
+
+        
     });
 </script>
