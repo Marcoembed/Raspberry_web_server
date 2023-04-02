@@ -1,7 +1,22 @@
+var alertShowed = 0;
 function responseByID(id) {
-    if (id == 5) {
-        alert("You are not loggedin.");
-        window.location.href = 'login.html';
+    if (id == 0) {
+      alert("Utente già collegato!");
+      window.location.href = 'index.html';
+    } else if (id == 1) {
+      alert("Email or Password Field are empty");
+    } else if (id == 2) {
+      alert("Failed to connect to the Mysql Server");
+    } else if (id == 3) {
+      alert("Wrong username or password!");
+    } else if (id == 4) {
+      window.location.href = 'index.html';
+    } else if (id == 5) {
+        if (alertShowed == 0) {
+            alert("You are not loggedin.");
+            window.location.href = 'login.html';
+            alertShowed = 1;
+        }
     } else if (id == 7) {
         alert("Error while intersecating information into the DB");
     } else if (id == 34) {
