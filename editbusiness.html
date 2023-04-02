@@ -96,7 +96,7 @@
               </div>
             </div>
             <div class="card-body">
-              <div classV="form-group">
+              <div class="form-group">
                 <label for="select_building">Select a Business Building</label>
                 <select id="select_building" class="form-control custom-select">
                   <option number="0" selected></option>
@@ -117,6 +117,11 @@
                     </div>
                     <input type="text" id="area_name" class="form-control">
                   </div>
+                </div>
+                <div class="form-group">
+					        <button disabled type="button" class="btn btn-danger float-right" id="remove_area" data-toggle="modal" data-target="#modal-remove-area">
+						       Remove Area
+					        </button>
                 </div>
               </div>
             </div>
@@ -178,12 +183,40 @@
               </div>
             </div>
             <div class="card-body">
-            
+              <div class="callout callout-info">
+                <h5>Choose a Business Building, an area name and the parent area!</h5>
+                <p>The parent area specify inside which area the new area will be.</p>
+              </div>
+              <div class="form-group">
+                <label for="select_building_for_new_area">Select a Business Building</label>
+                <select id="select_building_for_new_area" class="form-control">
+                  <option number="0" selected></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="add_business_area_name">New Business Area Name</label>
+                <input type="text" id="add_business_area_name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="add_business_area_parent">Select a parent Area</label>
+                <select id="add_business_area_parent" class="form-control">
+                  <option number="0" selected></option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="customSwitch1">
+                    <label class="custom-control-label" for="customSwitch1">White list access</label>
+                </div>
+              </div>
             </div>
             <!-- /.card-body -->
             <div class="card-footer">
-            
-            </div>
+              <div class="col-12">
+					      <button type="button" class="btn btn-success float-right" id="add_area">
+						      Add Area
+					      </button>
+              </div>
             <!-- /.card-footer -->
           </div>
           <!-- /.card -->
@@ -203,13 +236,8 @@
 					</button>
 				</div>
 				<div class="modal-body" id="show_changes">
-					<p id="noEdit">No Edit Found</p>
-					<p id="name_change_notification">Name will be modified from <b id="oldName"></b> to <b id="newName"></b></p>
-					<p id="surname_change_notification">Surname will be modified from <b id="oldSurname"></b> to <b id="newSurname"></b></p>
-					<p id="username_change_notification">Username will be modified from <b id="oldUsername"></b> to <b id="newUsername"></b></p>
-					<p id="email_change_notification">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
-          <p id="role_change_notification">Role will be modified from <b id="oldRole"></b> to <b id="newRole"></b></p>
-				</div>
+				
+        </div>
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-primary" id="save_changes_confirm">Save changes</button>
@@ -225,7 +253,7 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title">Confirm Add</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<button id="modal-add-building-close" type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
@@ -247,6 +275,47 @@
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-primary" id="add_building_confirm">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+  
+  <div class="modal fade" id="modal-add-area">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Confirm Add</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+          <div class="col-12">
+            <div class="alert alert-warning alert-dismissible">
+              <h5><i class="icon fas fa-exclamation-triangle"></i> Alert!</h5>
+              <p>Page will be reloaded after confirm.</p>
+            </div>
+            <div class="row">
+              <p>
+                Area with Name <b id="new_area_name">Loading..</b> will be added to your business under area <b id="new_area_parent_name">Loading..</b> in the building <b id="new_area_parent_building_name">Loading..</b>. 
+              </p>
+            </div>
+            <div class="row" style="display: none;" id="add_area_whitelist">
+              <p>No workers beside the one with permission will be able to enter this area.</p>
+            </div>
+            <div class="row" style="display: none;" id="add_area_blacklist">
+              <p>All workers beside the ones excluded will be able to enter this area</p>
+            </div>
+            <div class="row">
+              Are you sure?
+            </div>  
+          </div>
+				</div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="add_area_confirm">Save changes</button>
 				</div>
 			</div>
 			<!-- /.modal-content -->
@@ -321,6 +390,7 @@
                 data = obj.data.building[key];
                 businessInformation["building"][key] = {building_name: data["building_name"], areas: new Array()};
                 $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+                $("#select_building_for_new_area").append('<option number="'+key+'">'+data["building_name"]+'</option>');
               });
           }
         }
@@ -358,6 +428,36 @@
       }
     });
     
+    $('#select_building_for_new_area').change(function(){ 
+      $("#add_business_area_parent").empty();
+      $("#add_business_area_parent").append('<option number="0"></option>');
+
+      var building_id = $("#select_building_for_new_area option:selected" ).attr("number");
+      if (building_id == 0) {
+        $("#area_fields").hide(); 
+      } else {
+        $.post("get_info.php", 
+        { 
+          info_id: "9",
+          building_id: building_id
+        },
+    
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            obj = JSON.parse(data);
+            if (obj.data) {
+                $.each( obj.data, function( key, value ) {
+                  data = obj.data[key];
+                  businessInformation["building"][building_id]["areas"][key] = {area_name : data["name"]};
+                  $("#add_business_area_parent").append('<option number="'+key+'">'+data["name"]+'</option>');
+                });
+              
+            }
+          } else responseByID(obj.response);
+        });
+      }
+    });
+    
     $('#select_building_area').change(function(){
       $("#area_fields").show(); 
       var area_id = $("#select_building_area option:selected" ).attr("number");
@@ -369,7 +469,7 @@
         $("#area_name").val(businessInformation["building"][building_id]["areas"][area_id]["area_name"]);
         $.post("get_info.php", 
         { 
-          info_id:      "10",
+          info_id:      "11",
           building_id:  building_id,
           area_id:      area_id
         },
@@ -384,7 +484,8 @@
         });
       }
     });
-    
+   
+    // -- ADD NEW BUILDING FEATURE -- //
     $("button#add_building").click(function(){
       //alert("You clicked!");
       var new_building_name     = $("#add_business_building_name").val();
@@ -417,11 +518,101 @@
     
         function(data, status, xhr) {
           if (xhr.status == 200) {
-            obj = JSON.parse(data);
             location.reload();  
-          } else responseByID(obj.response);
+          } else {
+            obj = JSON.parse(data);
+            responseByID(obj.response);
+          }
         });
     });
+    // -- ADD NEW BUILDING FEATURE END -- //
+    
+    // -- ADD NEW AREA FEATURE -- //
+    $("button#add_area").click(function(){
+      var new_area_name         = $("#add_business_area_name").val();
+      var new_area_parent_id    = $("#add_business_area_parent option:selected" ).attr("number");
+      var new_area_parent_building_id = $("#select_building_for_new_area option:selected" ).attr("number");
+      var new_area_parent_building_name = $("#select_building_for_new_area option:selected" ).val();
+      var new_area_parent_name  = $("#add_business_area_parent option:selected" ).val();
+      var errorFound = 0;
+      
+      if (new_area_parent_id == 0) {
+        $("#add_business_area_parent").addClass("is-invalid");
+        errorFound = 1;
+      } else {
+        $("#add_business_area_parent").removeClass("is-invalid");
+      }
+      
+      if (new_area_parent_building_id == 0) {
+        $("#select_building_for_new_area").addClass("is-invalid");
+        errorFound = 1;
+      } else {
+        $("#select_building_for_new_area").removeClass("is-invalid");
+      }
+      
+      if (new_area_name == "") {
+        $("#add_business_area_name").addClass("is-invalid");
+        errorFound = 1;
+      } else {
+        $("#add_business_area_name").removeClass("is-invalid");
+      }
+      
+      if (!errorFound) {
+        $("b#new_area_name").text(new_area_name);
+        $("b#new_area_parent_name").text(new_area_parent_name);
+        $("b#new_area_parent_building_name").text(new_area_parent_building_name);
+        
+        if($("#customSwitch1").is(':checked')) {
+          $("#add_area_blacklist").show();  // checked
+          $("#add_area_whitelist").hide();  // checked
+        } else {
+          $("#add_area_whitelist").show();  // checked
+          $("#add_area_blacklist").hide();  // checked
+        }
+        
+        $('#modal-add-area').modal('show');
+        $("#add_business_area_name").removeClass("is-invalid");
+      }
+    });
+
+    // $('#add_business_area_name').on('input',function(e){
+    //   var new_area_name     = $("#add_business_area_name").val();
+    //   if (new_area_name != "") {
+    //     $("button#add_building").removeAttr('disabled');
+    //   } else {
+    //     $("button#add_building").attr('disabled', '');
+    //   }
+    // });
+    $("button#modal-add-building-close").click(function() {
+      $("button#add_area_confirm").attr('disabled', '');
+    });
+    
+    $("button#add_area_confirm").click(function(){
+      $("button#add_area_confirm").attr('disabled', '');
+      var new_area_name         = $("#add_business_area_name").val();
+      var new_area_parent_id    = $("#add_business_area_parent option:selected" ).attr("number");
+      var new_area_parent_building_id = $("#select_building_for_new_area option:selected" ).attr("number");
+      var whitelist = ($("#customSwitch1").is(':checked') == true) ? 1 : 0;
+        
+      $.post("set_info.php", 
+        { 
+          set_function    : "5",
+          area_name       : new_area_name,
+          area_parent_id  : new_area_parent_id,
+          building_parent_id : new_area_parent_building_id,
+          whitelist: whitelist
+        },
+    
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            location.reload();  
+          } else {
+            obj = JSON.parse(data);
+            responseByID(obj.response);
+          }
+        });
+    });
+    // -- ADD NEW AREA FEATURE END -- //
   });
 </script>
 </body>

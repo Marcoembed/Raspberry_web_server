@@ -17,7 +17,7 @@ if ($database->init() == 2) {
 
 // Show the log access in the Customer Administrator Dashboard
 if ($_POST["info_id"] == 0) {
-	$return = $database->get_access_log();
+	$return = $database->get_access_log("", 1);
 
 	if ($return["return"] == 0) {
 		http_response_code(200);
@@ -192,6 +192,37 @@ if ($_POST["info_id"] == 9) {
 	$my_business = $_SESSION["BusinessId"];
 	
 	$return = $database->get_business_areas($my_business, $_POST["building_id"]);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = ["data" => $return["data"]];
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// Get the information regarding area access
+if ($_POST["info_id"] == 10) {
+	$return = $database->get_people_in_building(1, 0);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = ["data" => $return["data"]];
+		exit (json_encode($response));
+	} else {
+		http_response_code(200);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// Get the information regarding an area (like area name)
+if ($_POST["info_id"] == 11) {
+	// $return = $database->get_people_in_building(1, 0);
+	$return["return"] == 0;
 
 	if ($return["return"] == 0) {
 		http_response_code(200);

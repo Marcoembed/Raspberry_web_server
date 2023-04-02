@@ -77,7 +77,7 @@
             <div class="icon">
             <i class="ion ion-pie-graph"></i>
             </div>
-            <!-- <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> -->
+            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
         </div>
         </div>
         <!-- ./col -->
@@ -88,16 +88,32 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Logs</h3>
-                    <div class="card-tools">
-                        <!-- <div class="input-group input-group-sm" style="width: 150px;">
-                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" disabled>
-                            <div class="input-group-append">
-                                <button type="submit" class="btn btn-default" disabled>
-                                <i class="fas fa-search"></i>
-                                </button>
+                    <div class="row">
+                        <div class="col-12">
+                            <h3 class="card-title">Logs</h3>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6" style="text-align: right;">
+                            <label>Search by Building and/or Name Surname </label>
+                        </div>
+                        <div class="col-4">
+                            <select id="select_building_logs" class="form-control">
+                              <option selected="selected" number="0"></option>
+                            </select>
+                        </div>
+                        <div class="col-2">
+                            <div class="card-tools">
+                                <div class="input-group">
+                                    <input type="text" id="search_workers_logs" class="form-control float-right" placeholder="Search">
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-default" disabled>
+                                        <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
                 <!-- /.card-header -->
@@ -136,7 +152,7 @@
         </div>
         <div class="col-sm-2">
             <div class="input-group input-group">
-                <input type="text" id="search_workes" class="form-control float-right" placeholder="Search">
+                <input type="text" id="search_workers" class="form-control float-right" placeholder="Search">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-default" disabled>
                     <i class="fas fa-search"></i>
@@ -248,109 +264,180 @@
 </div>
 
 <script>
-        var userReceived = [];
-        function showWorkers(obj) {
-            $.each( obj.data, function( key, value ) {
-                data = obj.data[key];
-                data_len = obj.data.length;
-                data_grid = "col-12 col-sm-6 col-md-4";
-                if (data_len == 1) {
-                    data_grid = "col-12 col-sm-12 col-md-12";
-                }
-                if (data_len == 2) {
-                    data_grid = "col-12 col-sm-6 col-md-6";
-                }
+    var userReceived = [];
+    function showWorkers(obj) {
+        $.each( obj.data, function( key, value ) {
+            data = obj.data[key];
+            data_len = obj.data.length;
+            data_grid = "col-12 col-sm-6 col-md-4";
+            if (data_len == 1) {
+                data_grid = "col-12 col-sm-12 col-md-12";
+            }
+            if (data_len == 2) {
+                data_grid = "col-12 col-sm-6 col-md-6";
+            }
 
-                userReceived[data["id"]] = data;
+            userReceived[data["id"]] = data;
 
-                $("#show_workers").append
-                (
-                '<div class="'+data_grid+' d-flex align-items-stretch flex-column"> \
-                    <div class="card bg-light d-flex flex-fill"> \
-                    <div class="card-header text-muted border-bottom-0"> \
-                        '+data["name"]+' '+data["surname"]+' \
+            $("#show_workers").append
+            (
+            '<div class="'+data_grid+' d-flex align-items-stretch flex-column"> \
+                <div class="card bg-light d-flex flex-fill"> \
+                <div class="card-header text-muted border-bottom-0"> \
+                    '+data["name"]+' '+data["surname"]+' \
+                </div> \
+                <div class="card-body pt-0"> \
+                    <div class="row"> \
+                    <div class="col-7"> \
+                        <h2 class="lead"><b>'+data["username"]+'</b></h2> \
+                        <p class="text-muted text-sm"><b>Role: </b>'+expandRole(data["role"])+'</p> \
+                        <ul class="ml-4 mb-0 fa-ul text-muted"> \
+                        <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> Address: Function not implemented</li> \
+                        <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span> Phone #: Function not implemented</li> \
+                        </ul> \
                     </div> \
-                    <div class="card-body pt-0"> \
-                        <div class="row"> \
-                        <div class="col-7"> \
-                            <h2 class="lead"><b>'+data["username"]+'</b></h2> \
-                            <p class="text-muted text-sm"><b>Role: </b>'+expandRole(data["role"])+'</p> \
-                            <ul class="ml-4 mb-0 fa-ul text-muted"> \
-                            <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> Address: Function not implemented</li> \
-                            <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span> Phone #: Function not implemented</li> \
-                            </ul> \
-                        </div> \
-                        <div class="col-5 text-center"> \
-                            <img src="../../dist/img/user1-128x128.jpg" alt="user-avatar" class="img-circle img-fluid"> \
-                        </div> \
-                        </div> \
-                    </div> \
-                    <div class="card-footer"> \
-                        <div class="text-right"> \
-					    <button type="button" class="btn btn-sm btn-danger" id="remove_user" number='+data["id"]+' data-toggle="modal" data-target="#modal-xl"> \
-                            <i class="fas fa-user-slash"></i> Remove Profile \
-					    </button> \
-                        <a href="editprofile.html?id='+data["id"]+'" class="btn btn-sm btn-warning"> \
-                            <i class="fas fa-user-edit"></i> Edit Profile \
-                        </a> \
-                        <a href="viewprofile.html?id='+data["id"]+'" class="btn btn-sm btn-primary"> \
-                            <i class="fas fa-user"></i> View Profile \
-                        </a> \
-                        </div> \
+                    <div class="col-5 text-center"> \
+                        <img src="../../dist/img/user1-128x128.jpg" alt="user-avatar" class="img-circle img-fluid"> \
                     </div> \
                     </div> \
-                </div>'
-                );
-            });
-        }
+                </div> \
+                <div class="card-footer"> \
+                    <div class="text-right"> \
+				 <button type="button" class="btn btn-sm btn-danger" id="remove_user" number='+data["id"]+' data-toggle="modal" data-target="#modal-xl"> \
+                        <i class="fas fa-user-slash"></i> Remove Profile \
+				 </button> \
+                    <a href="editprofile.html?id='+data["id"]+'" class="btn btn-sm btn-warning"> \
+                        <i class="fas fa-user-edit"></i> Edit Profile \
+                    </a> \
+                    <a href="viewprofile.html?id='+data["id"]+'" class="btn btn-sm btn-primary"> \
+                        <i class="fas fa-user"></i> View Profile \
+                    </a> \
+                    </div> \
+                </div> \
+                </div> \
+            </div>'
+            );
+        });
+    }
+    
+    function sendRequest_getWorkes(page_number, filter, filter_building) {
+        // Request a new page in the show workes section
         
-        function sendRequest_getWorkes(page_number, filter, filter_building) {
-            // Request a new page in the show workes section
-            
-            var pageNumber = page_number;
+        var pageNumber = page_number;
+    
+        $.post("get_info.php", 
+        { 
+            info_id: 1,
+            page: pageNumber,
+            filter: filter,
+            filter_building: filter_building
+        },
         
-            $.post("get_info.php", 
-            { 
-                info_id: 1,
-                page: pageNumber,
-                filter: filter,
-                filter_building: filter_building
-            },
-            
-            function(data, status, xhr) {
-                $("#show_workers").empty();
-                $("#workes_page_navigation").empty();
-                obj = JSON.parse(data);
-                if (xhr.status == 200) {
-                    var iteration = obj.amount/9;
-                    if (iteration == 0)
-                        iteration = 1;
-                        
-                    var found = 0;
-                    for(let i = 1; i < 1 + iteration; i++) {
-                        if (i == pageNumber) {
-                            found = 1;
-                            $("#workes_page_navigation").append
-                            ('<li class="page-item active" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
-                        } else
-                            $("#workes_page_navigation").append
-                            ('<li class="page-item" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
-                        if(found == 0) {
-                            $("#workes_page_navigation [number="+Math.ceil(iteration)+"]").addClass("active");
-                        }
-                    }
+        function(data, status, xhr) {
+            $("#show_workers").empty();
+            $("#workes_page_navigation").empty();
+            obj = JSON.parse(data);
+            if (xhr.status == 200) {
+                var iteration = obj.amount/9;
+                if (iteration == 0)
+                    iteration = 1;
                     
-                    if (obj.data) {
-                        showWorkers(obj);
-                    } else {
-                        //alert("No workes found..");
+                var found = 0;
+                for(let i = 1; i < 1 + iteration; i++) {
+                    if (i == pageNumber) {
+                        found = 1;
+                        $("#workes_page_navigation").append
+                        ('<li class="page-item active" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
+                    } else
+                        $("#workes_page_navigation").append
+                        ('<li class="page-item" id="page_number" number="'+i+'"><a class="page-link">'+i+'</a></li>');
+                    if(found == 0) {
+                        $("#workes_page_navigation [number="+Math.ceil(iteration)+"]").addClass("active");
                     }
-                } else responseByID(obj.response);
-            });
-        }
+                }
+                
+                if (obj.data) {
+                    showWorkers(obj);
+                } else {
+                    //alert("No workes found..");
+                }
+            } else responseByID(obj.response);
+        });
+    }
 
+    // -- General Purpose functions
+    $(document).ready(function() {
+        
+        // -- This function gets the Business Name -- //
+        $.post("get_info.php", 
+        { 
+            info_id: "4",
+        },
+        
+        function(data, status, xhr) {
+            obj = JSON.parse(data);
+            if (xhr.status == 200) {
+                if (obj.business_name) {
+                    $("#business_name").text("["+obj.business_name+"] Dashboard - Customer Administrator")
+                }
+            } else responseByID(obj.response);
+        });
+        
+        // -- This function gets some stats regarding business access -- //
+        $.post("get_info.php", 
+        { 
+            info_id: "10",
+        },
+        
+        function(data, status, xhr) {
+            if (xhr.status == 200) {
+            
+            } else responseByID(obj.response);
+        });
+    });
+
+    // -- Logs table releted functions
+    $(document).ready(function() {
+        
+        // -- This function is sended as soon as the page is loaded to get logs. 
+        $.post("get_info.php", 
+        { 
+            info_id: "0",
+        },
+        
+        function(data, status, xhr) {
+            if (xhr.status == 200) {
+                obj = JSON.parse(data);
+                
+                if (obj.data) {
+                    $.each( obj.data, function( key, value ) {
+                    data = obj.data[key];
+                    $("#ListAccesses tbody").append("<tr>"+
+                        "<td>"+data["id"]+"</td>"+
+                        "<td>"+data["Username"]+"</td>"+
+                        "<td>"+data["Time"]+"</td>"+
+                        "<td>"+data["Area"]+"</td>"+
+                        "<td>"+data["action"]+"</td>"+
+                        "</tr>");
+                    });
+                }
+            } else responseByID(obj.response);     
+        });
+    });
+
+    // -- Workers table releted functions
     $(document).ready(function(){
+        var userToBeRemoved;
+        
+        var businessInformation = {
+          building : new Array
+        };
 
+        // -- This function is called as soon as the page is loaded to verify if the user has
+        // --   the role of seeing this page. This check is done on the client side, but every action
+        // --   in this page is forbidden by the server if the user is not a CA.
+
+        // -- Every check in the client side can be overidden, but the server will not allow any action.
         $.post("get_info.php", 
         { 
             info_id: "5",
@@ -366,15 +453,18 @@
             }
         });
 
+        // -- This request is sended as soon as the page is loaded to show the workers
         sendRequest_getWorkes(1, "", 0);
         
+        // -- This function reacts to the user click on a page number in the workers table
         $(document).on('click', "#page_number", function(){
             var building_id = $("#select_building option:selected" ).attr("number");
             var pageNumber = $(this).attr('number');
-            sendRequest_getWorkes(pageNumber, $('#search_workes').val(), building_id);
+            sendRequest_getWorkes(pageNumber, $('#search_workers').val(), building_id);
         });
 
-        $('#search_workes').on('input', function() {
+        // -- This function reacts to the user searching a name in the workers table
+        $('#search_workers').on('input', function() {
             var building_id = $("#select_building option:selected" ).attr("number");
             
             $("#show_workers .card > .overlay").remove();
@@ -383,61 +473,23 @@
                 <i class="fas fa-3x fa-sync-alt"></i> \
             </div>'
             );
-            sendRequest_getWorkes(1, $('#search_workes').val(), building_id);
+            sendRequest_getWorkes(1, $('#search_workers').val(), building_id);
         });
     
+        // -- This functions reacts to the user selecting a different building in the workers table
         $('#select_building').change(function(){ 
             var building_id = $("#select_building option:selected" ).attr("number");
-            sendRequest_getWorkes(1, $('#search_workes').val(), building_id);
+            sendRequest_getWorkes(1, $('#search_workers').val(), building_id);
         });
-
-        $.post("get_info.php", 
-        { 
-            info_id: "0",
-        },
         
-        function(data, status, xhr) {
-            if (xhr.status == 200) {
-                obj = JSON.parse(data);
-                
-                if (obj.data) {
-                    $.each( obj.data, function( key, value ) {
-                    data = obj.data[key];
-                    $("#ListAccesses tbody").append("<tr>"+
-                        "<td>"+data["id"]+"</td>"+
-                        "<td>"+data["PersonID"]+"</td>"+
-                        "<td>"+data["Time"]+"</td>"+
-                        "<td>"+data["Area"]+"</td>"+
-                        "<td>"+data["action"]+"</td>"+
-                        "</tr>");
-                    });
-                }
-            } else responseByID(obj.response);     
-        });
-
-        $.post("get_info.php", 
-        { 
-            info_id: "4",
-        },
-        
-        function(data, status, xhr) {
-            obj = JSON.parse(data);
-            if (xhr.status == 200) {
-                if (obj.business_name) {
-                    $("#business_name").text("["+obj.business_name+"] Dashboard - Customer Administrator")
-                }
-            } else responseByID(obj.response);
-        });
-
-
-        var userToBeRemoved;
-        
+        // -- This functions reacts to the user selecting "Remove User" button
         $(document).on('click', "#remove_user", function(){
             var userid = $(this).attr('number');
             userToBeRemoved = userid;
             $("#user_remove_name").text(userReceived[userid]["name"]+" "+userReceived[userid]["surname"]);
         });
         
+        // -- This functions reacts to the user selecting "Remove User" button in the confirmation page
         $(document).on('click', "#save_remove_action", function(){
             $("#save_remove_action").attr("disabled", '');    
             //$('#modal-xl').modal('hide')
@@ -458,30 +510,27 @@
             });
         });
 
-    var businessInformation = {
-      building : new Array
-    };
-
-    $.post("get_info.php", 
-    { 
-      info_id: "8",
-    },
+        // -- This functions loads the business's building
+        $.post("get_info.php", 
+        { 
+          info_id: "8",
+        },
     
-    function(data, status, xhr) {
-      if (xhr.status == 200) {
-        obj = JSON.parse(data);
-        if (obj.data) {
-          if (obj.data.building) {
-              $.each( obj.data.building, function( key, value ) {
-                data = obj.data.building[key];
-                businessInformation["building"][key] = {building_name: data["building_name"]};
-                $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
-              });
-          }
-        }
-      } else responseByID(obj.response);
-    });
-
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            obj = JSON.parse(data);
+            if (obj.data) {
+              if (obj.data.building) {
+                  $.each( obj.data.building, function( key, value ) {
+                    data = obj.data.building[key];
+                    businessInformation["building"][key] = {building_name: data["building_name"]};
+                    $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+                    $("#select_building_logs").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+                  });
+              }
+            }
+          } else responseByID(obj.response);
+        });
         
     });
 </script>

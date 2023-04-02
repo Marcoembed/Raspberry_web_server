@@ -125,4 +125,26 @@ if ($_POST["set_function"] == 4) {
 	exit (json_encode($return));	
 }
 
+/**
+ * Create a new area for the current business
+ */
+if ($_POST["set_function"] == 5) {
+	$array_to_pass = [
+		"area_name" 			=> $_POST["area_name"],
+		"area_parent_id" 		=> $_POST["area_parent_id"],
+		"building_parent_id" 	=> $_POST["building_parent_id"],
+		"whitelist" 			=> $_POST["whitelist"]
+	];
+	
+	$return["response"] = $database->create_new_area($array_to_pass);
+
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
 ?>

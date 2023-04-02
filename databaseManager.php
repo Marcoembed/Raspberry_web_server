@@ -287,23 +287,47 @@
                 $stmt->close();
             }
         }
-
+        
         /**
-         * Get the log of the access in a Business.
+         * Get the number of people in a building or in a area.
          *
          * Description.
          * 
          * @return array check "return" key. If 0 everything is ok, else error code.
          */
-        function get_access_log() {
+        function get_people_in_building($filter_building, $filter_area) {
             require_once 'functions.php'; 
             
             if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
                 return 34;
             }
+
+            $my_businessid = $_SESSION["BusinessId"];
             
-            $sql =  "SELECT `id`, `Time`, `Area`, `PersonID`, `action` FROM `business_access_log` WHERE ".
-                    "`BusinessID` = ".$_SESSION['BusinessId'];
+            $sql2 = "AND `business_areas`.`parent_id` = 0";
+            $sql3 = "";
+            if (isset($filter_building)) {
+                $sql3 = "AND `business_access_log`.`building_id` = ".$filter_building;
+                if ($filter_area != 0) {
+                    $sql2 = "AND `business_areas`.`id` = ".$filter_area;
+                }
+            } else {
+                exit("You have to filter by building");
+            }
+
+            // With this SQL i want to get all the logs releted to a specific area.
+            // If the filter_area equal to zero, this means i want to get the logs releted to the main building
+            $sql =
+            "SELECT `action`, `userinfo`.id, `userinfo`.username, 
+            FROM `business_access_log` 
+            INNER JOIN `userinfo` ON `business_access_log`.`user_id` = `userinfo`.`id`
+            INNER JOIN `business_areas` ON `business_areas`.id = `business_access_log`.area_id 
+            WHERE `business_access_log`.`business_id` = 1 
+            ".$sql3."
+            ".$sql2.
+            " AND CAST(`time` AS DATE) = CAST( NOW() AS DATE)";
+
+            exit($sql);
 
             $result = $this->con->query($sql);
             $response;
@@ -312,15 +336,70 @@
                 // output data of each row
                 $i = 0;
                 while($row = $result->fetch_assoc()) {
-                    $sql = "SELECT `username` FROM `userinfo` WHERE `id` = ".$row['PersonID'];
-                    $result2 = $this->con->query($sql);
-                    $row2 = $result2->fetch_assoc();
+                    $array;
+                    $response["data"][$i] = $array;
+                    $response["return"] = 0;
+                    $i++;
+                }
+            } else {
+                $response["return"] = 37;
+            }
+
+            return $response;
+        
+        }
+
+
+
+        /**
+         * Get the log of the access in a Business for the current day.
+         *
+         * Description.
+         * 
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        function get_access_log($filter_name, $filter_building) {
+            require_once 'functions.php'; 
+            
+            if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
+                return 34;
+            }
+
+            $my_businessid = $_SESSION["BusinessId"];
+            
+            $sql2 = "";
+            $sql3 = "";
+            if (isset($filter_name)) {
+                $sql2 = $filter_name;
+                if (isset($filter_building)) {
+                    $sql3 = "AND `business_access_log`.`building_id` = ".$filter_building;
+                }
+            }
+
+            $sql =  "SELECT `area_id`, `action`, `badge_id`, `time`, 
+                        `userinfo`.id AS `PersonID`, `userinfo`.`username`, 
+                        `business_areas`.`name` AS `AreaName` 
+                        FROM `business_access_log` 
+                        INNER JOIN `userinfo` ON `business_access_log`.`user_id` = `userinfo`.`id`
+                        INNER JOIN `business_areas` ON `business_areas`.id = `business_access_log`.area_id 
+                        WHERE `business_access_log`.`business_id` = 1 
+                        ".$sql3.  
+                        " AND CAST(`time` AS DATE) = CAST( NOW() AS DATE) 
+                        AND (CONCAT_WS (' ', `userinfo`.name, `userinfo`.surname) LIKE '%".$sql2."%')";
+
+            $result = $this->con->query($sql);
+            $response;
+        
+            if ($result->num_rows > 0) {
+                // output data of each row
+                $i = 0;
+                while($row = $result->fetch_assoc()) {
         
                     $array = [  
-                                "id"        => $row["id"], 
-                                "Time"      => $row["Time"], 
-                                "Area"      => $row["Area"], 
-                                "PersonID"  => $row2["username"], 
+                                "id"        => $row["PersonID"], 
+                                "Time"      => $row["time"], 
+                                "Area"      => $row["AreaName"], 
+                                "Username"  => $row["username"], 
                                 "action"    => $row["action"]];
 
                     $response["data"][$i] = $array;
@@ -652,7 +731,7 @@
         }
         
         /**
-         * Get business areas.
+         * Create new business building.
          * 
          * @return array check "return" key. If 0 everything is ok, else error code.
          */
@@ -665,6 +744,32 @@
                 'INSERT INTO business_building (`business_id`, `building_name`, `building_address`) '.
                 'VALUES (?, ?, ?)')) {
                 $stmt->bind_param('iss', $businessID, $building_name, $building_address);
+                $stmt->execute();
+                if(mysqli_affected_rows($this->con) == 1) {
+                    $response = 0;
+                } else {
+                    $response = 41;
+                }
+            }
+            
+            return $response;
+            $stmt->close();
+        }
+        
+        /**
+         * Create new business areas.
+         * 
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        function create_new_area($array) {
+            $businessID = $_SESSION["BusinessId"];
+            $response = 1;
+            
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            if ($stmt = $this->con->prepare(
+                'INSERT INTO business_areas (`business_id`, `business_building_id`, `parent_id`, `name`, `whitelist_enabled`) '.
+                'VALUES (?, ?, ?, ?, '.$array["whitelist"].')')) {
+                $stmt->bind_param('iiis', $businessID, $array["building_parent_id"], $array["area_parent_id"], $array["area_name"]);
                 $stmt->execute();
                 if(mysqli_affected_rows($this->con) == 1) {
                     $response = 0;
