@@ -17,6 +17,10 @@ function responseByID(id) {
             window.location.href = 'login.html';
             alertShowed = 1;
         }
+    } else if (id == 6) {
+        if (alertShowed == 0) {
+            alert("No user found/no enough permission.");
+        }
     } else if (id == 7) {
         alert("Error while intersecating information into the DB");
     } else if (id == 34) {

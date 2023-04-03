@@ -75,9 +75,6 @@ if ($stmt = $con->prepare('SELECT id, password FROM userinfo WHERE email = ?')) 
 			$_SESSION['loggedin'] 	= TRUE;
 			$_SESSION['id'] 		= $id;
 			
-			$_SESSION['BusinessId']	= 1;
-			$_SESSION['role'] 		= "CA";
-			
 			$_SESSION['playrole']	= 0;
 			// $_SESSION['playrole_id'] = 2;
 			

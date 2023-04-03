@@ -28,7 +28,7 @@ function check_permission_role($id, $businessid, $role_requested, $role_actual) 
 			return 0;
 		}
 	}
-	else if ($_POST["role"] == "CO") {
+	else if ($role_requested == "CO") {
 		if ($role_actual == "CO" || $role_actual == "CA" || $role_actual == "SA") {
 			return 1;
 		}

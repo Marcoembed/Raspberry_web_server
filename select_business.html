@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Select Business</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+  <!-- icheck bootstrap -->
+  <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition login-page">
+<div class="login-box">
+  <div class="login-logo">
+    <a><b>Admin</b>LTE</a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Multiple Business Found</p>
+      <form id="selectBusiness">
+        <div class="form-group">
+          <select id="select_building_select" class="form-control">
+          </select>
+        </div>
+        <div class="row">
+          <div class="col-8">
+          
+          </div>
+          <div class="col-4">
+            <button type="button" id="login_button" class="btn btn-primary btn-block">Continue</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- /.login-card-body -->
+  </div>
+</div>
+<!-- /.login-box -->
+
+<!-- jQuery -->
+<script src="../../plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="../../dist/js/adminlte.min.js"></script>
+
+<!-- Error function Handling -->
+<script src="dist/js/error.js"></script>
+
+<!-- Login Script -->
+<script>
+  $(document).ready(function(){
+    $(document).on('keypress',function(e) {
+      if(e.which == 13) {
+        $("#login_button").click();
+      }
+    });
+    
+    // This function is used to retrieve the information related to the business
+    $.post("get_info.php", 
+    { 
+      info_id: "13",
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+        if (obj.data) {
+          if (obj.data.business) {
+              var counter = 0;
+              $.each( obj.data.business, function( key, value ) {
+                data = obj.data.business[key];
+                $("#select_building_select").append('<option number="'+key+'">'+data["business_name"]+'</option>');
+                counter++;
+              });
+          }
+        }
+      } else responseByID(obj.response);
+      
+      if (counter == 1) {
+        alert("Only one business found. Redirecting..");
+        window.location.href = 'index.html';
+      }
+    });
+
+    $("#login_button").click(function(){
+      var selected_business_id = $("#select_building_select").attr("number");
+      $.post("login.php",
+      { 
+
+      },
+      
+      function(data, status, xhr) {
+        obj = JSON.parse(data);
+        if (obj.response == 3) { // wrong username or password.
+        
+        } else responseByID(obj.response);
+      });
+    });
+  });
+</script>
+</body>
+</html>
