@@ -28,7 +28,7 @@ if ($database->init() == 2) {
  * @param $_POST['data'] JSON Information to modify
  */
 if ($_POST["set_function"] == 0) {
-	
+	$response;
 	if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
 		$response = ["code" => '34']; // Set the response to "No permission for this action"	
 		exit (json_encode($response));
@@ -41,11 +41,12 @@ if ($_POST["set_function"] == 0) {
 		exit (json_encode($response));	
 	}
 
-	$response;
 	foreach ($obj as $key => $value) {
-		$response = $database->update_userinfo($key, $_POST["id"], $value);
-		if($response["code"] != 42) {
-			exit (json_encode($response)); // Set the response to "Update not OK"		
+		if ($value != "") {
+			$response = $database->update_userinfo($key, $_POST["id"], $value);
+			if($response["code"] != 42) {
+				exit (json_encode($response)); // Set the response to "Update not OK"		
+			}
 		}
 	}
 

@@ -15,6 +15,27 @@ if ($database->init() == 2) {
 	exit (json_encode($response));	
 }
 
+$my_id;
+$my_role;
+$my_businessid;
+if ($_SESSION["playrole"] == 1) {
+	$my_id = $_SESSION["playrole_id"];
+} else {
+	$my_id = $_SESSION["id"];
+}
+
+$my_businessid = $_SESSION["BusinessId"];
+$my_role = $database->get_role_in_business($my_id, $my_businessid);
+if (is_numeric($my_role) === FALSE) {
+
+} else {
+	http_response_code(400);
+	$response["response"] = $information;
+	if ($_POST["info_id"] != 13) {
+		exit (json_encode($response));
+	}
+}
+
 // Show the log access in the Customer Administrator Dashboard
 if ($_POST["info_id"] == 0) {
 	$return = $database->get_access_log("", 1);
@@ -82,18 +103,49 @@ if ($_POST["info_id"] == 2) {
 // API used by the viewprofile page
 // API also used by editprofile page
 if ($_POST["info_id"] == 3) {
+	require "functions.php";
 	$id;
-	if ($_POST["id"] == 0) {
+	global $my_id;
+	global $my_role;
+	if ($_POST["id"] == 0) { // You are requesting information about yourself
 		$id = $_SESSION["id"];
 	} else {
 		$id = $_POST["id"];
+		if(!check_permission_role($my_id, $_SESSION["BusinessId"], "CO", $my_role)) {
+			http_response_code(400);
+			$return["response"] = 31;
+			exit(json_encode($return));
+		}
 	}
 	$return = $database->get_user_information($id);
 
+	$allowed_fields = [
+		//"birthdate",
+		"name",
+		"surname",
+		"id_business_building",
+		"business_email",
+		"city",
+		"country",
+		"role",
+		"sex",
+		"street",
+		"number",
+		"telephone",
+		"telephone_prefix",
+		"zip"
+	];
+
 	if ($return["return"] == 0) {
 		http_response_code(200);
-		$response = ["data" => $return["data"]];
-		exit (json_encode($response));
+		$allowed_data;
+
+		foreach($allowed_fields as $value) {
+			$to_client["data"][$value] = $return["data"][$value] == null ? "" : $return["data"][$value];
+		}
+		
+		$to_client["data"]["birthdate"] = date('d/m/Y', strtotime($return["data"]["birthdate"]));
+		exit (json_encode($to_client));
 	} else {
 		http_response_code(401);
 		$response = ["response" => $return["return"]];
@@ -149,13 +201,8 @@ if ($_POST["info_id"] == 6) {
 // Check the current role in the Business
 // This can be used by the client to show the right page
 if ($_POST["info_id"] == 7) {
-
-	$userid;
-	if($_SESSION["playrole"] == 1) {
-		$userid = $_SESSION["playrole_id"];
-	} else {
-		$userid = $_SESSION["id"];
-	}
+	global $my_id;
+	$userid = $my_id;
 
 	$information = $database->get_role_in_business($userid, $_SESSION["BusinessId"]);
 	if (is_numeric($information) === FALSE) {
@@ -171,7 +218,19 @@ if ($_POST["info_id"] == 7) {
 }
 
 // API used by the editbusiness page
+// -- This function is used to retrieve the information related to the business buildings
 if ($_POST["info_id"] == 8) {
+	require "functions.php";
+	$id;
+	global $my_id;
+	global $my_role;
+	
+	if(!check_permission_role($my_id, $_SESSION["BusinessId"], "CO", $my_role)) {
+		http_response_code(400);
+		$return["response"] = 31;
+		exit(json_encode($return));
+	}
+	
 	$my_business = $_SESSION["BusinessId"];
 	
 	$return = $database->get_business_info($my_business);
@@ -227,6 +286,42 @@ if ($_POST["info_id"] == 11) {
 	if ($return["return"] == 0) {
 		http_response_code(200);
 		$response = ["data" => $return["data"]];
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// Get the number of workers for the current business
+if ($_POST["info_id"] == 12) {
+	$return = $database->get_numer_of_workers();
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = $return;
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// Get the business the worker belong
+if ($_POST["info_id"] == 13) {
+	global $my_id;
+	$return = $database->get_user_business($my_id);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = $return;
+
+		if ($response["data"]["number_of_business"] == 1) {
+			$_SESSION['BusinessId']	= $response["data"]["last_businessID"];
+			$_SESSION['role'] 		= $database->get_role_in_business($my_id, $_SESSION["BusinessId"]);
+		}
 		exit (json_encode($response));
 	} else {
 		http_response_code(401);

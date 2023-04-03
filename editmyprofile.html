@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
-    <!-- daterangVe picker -->
+    <!-- daterange picker -->
   <link rel="stylesheet" href="../../plugins/daterangepicker/daterangepicker.css">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -56,6 +56,7 @@
           <div class="card card-primary">
             <div class="card-header">
               <h3 class="card-title">User Information</h3>
+
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                   <i class="fas fa-minus"></i>
@@ -64,30 +65,35 @@
             </div>
             <div class="card-body">
               <div class="form-group">
-                <div class="row">
-                  <div class="col-6">
-                    <label for="inputName">Name</label>
-                    <input type="text" disabled id="profile_name" class="form-control">
-                  </div>
-                  <div class="col-6">
-                    <label for="inputName">Surname</label>
-                    <input type="text" disabled id="profile_surname" class="form-control">
-                  </div>
-                </div>
+                <label for="inputName">Name</label>
+                <input type="text" id="profile_name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputName">Surname</label>
+                <input type="text" id="profile_surname" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputName">Username</label>
+                <input type="text" id="profile_username" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="inputName">Email</label>
+                <input type="text" id="profile_email" class="form-control">
               </div>
               <div class="form-group">
                 <label for="inputStatus">Role</label>
                 <select id="inputStatus" class="form-control custom-select">
                   <option disabled="">SA</option>
-                  <option id="CA_option" number="CA">CA</option>
-                  <option id="CO_option" number="CO">CO</option>
-                  <option id="USR_option" number="USR">USR</option>
+                  <option id="CA_option" disabled="">CA</option>
+                  <option id="CO_option">CO</option>
+                  <option id="USR_option">USR</option>
+                  <!-- <option selected="">USR</option> -->
                 </select>
               </div>
               <div class="form-group">
                 <label for="user_main_building">Main Building</label>
                 <select id="user_main_building" class="form-control">
-                
+                  <!-- <option selected="">USR</option> -->
                 </select>
               </div>
             </div>
@@ -171,11 +177,11 @@
                 </div>
               </div>
               <div class="form-group">
-                <label for="profile_sex">Sex</label>
-                <select id="profile_sex" class="form-control custom-select">
-                  <option id="male_option" number="Male">Male</option>
-                  <option id="female_option" number="Female">Female</option>
-                  <option id="others_option" number="Others">Others</option>
+                <label for="inputStatus">Sex</label>
+                <select id="inputStatus" class="form-control custom-select">
+                  <option id="male_option">Male</option>
+                  <option id="female_option">Female</option>
+                  <option id="others_option">Others</option>
                 </select>
               </div>
             </div>
@@ -205,8 +211,13 @@
 					</button>
 				</div>
 				<div class="modal-body" id="show_changes">
-				
-        </div>
+					<p id="noEdit">No Edit Found</p>
+					<p id="name_change_notification">Name will be modified from <b id="oldName"></b> to <b id="newName"></b></p>
+					<p id="surname_change_notification">Surname will be modified from <b id="oldSurname"></b> to <b id="newSurname"></b></p>
+					<p id="username_change_notification">Username will be modified from <b id="oldUsername"></b> to <b id="newUsername"></b></p>
+					<p id="email_change_notification">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
+          <p id="role_change_notification">Role will be modified from <b id="oldRole"></b> to <b id="newRole"></b></p>
+				</div>
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-primary" id="save_changes_confirm">Save changes</button>
@@ -218,8 +229,18 @@
 	</div>
   <!-- /.content-wrapper -->
 
-  <div id="footer_container">
-  </div>
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-block">
+      <b>Version</b> 3.2.0
+    </div>
+    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
 
@@ -230,8 +251,6 @@
 <!-- InputMask -->
 <script src="../../plugins/moment/moment.min.js"></script>
 <script src="../../plugins/inputmask/jquery.inputmask.min.js"></script>
-<!-- Error function Handling -->
-<script src="dist/js/error.js"></script>
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.js"></script>
 
@@ -239,7 +258,9 @@
   $(document).ready(function(){
     $("#sidebar_container").load("sidebar_CA.html");
     $("#navbar_container").load("navbar_CA.html");
-    $("#footer_container").load("footer.html");
+
+		$("#noEdit").hide();
+		$("#email_change_notification").hide();
 
     //Datemask dd/mm/yyyy
     $('#profile_birthday').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
@@ -253,81 +274,8 @@
         return results[1] || 0;
       }
     }
-    
-    // -- This function is used to retrieve the information related to the business buildings
-    var businessInformation = {
-      building : new Array
-    };
-
-    $.post("get_info.php", 
-    { 
-      info_id: "8",
-    },
-    
-    function(data, status, xhr) {
-      if (xhr.status == 200) {
-        obj = JSON.parse(data);
-        if (obj.data) {
-          if (obj.data.building) {
-              $.each( obj.data.building, function( key, value ) {
-                data = obj.data.building[key];
-                businessInformation["building"][key] = {building_name: data["building_name"], areas: new Array()};
-                $("#user_main_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
-              });
-          }
-        }
-      } else responseByID(obj.response);
-    });
-    // -- END FUNCTION
 
     var userInformation = new Array();
-    const expected_param = [
-      "name",
-      "surname",
-		  "birthdate",
-		  "id_business_building",
-		  "business_email",
-		  "city",
-		  "country",
-		  "role",
-		  "sex",
-		  "street",
-      "number",
-		  "telephone",
-		  "telephone_prefix",
-		  "zip"
-    ];
-    const text_field = {
-      "profile_name" : "name",
-      "profile_surname" : "surname",
-		  "profile_birthday" : "birthdate",
-		  "profile_business_email" : "business_email",
-		  "profile_city" : "city",
-		  "profile_country" : "country",
-		  "profile_street" : "street",
-		  "profile_street_number" : "number",
-		  "profile_business_cellphone" : "telephone",
-		  "profile_cellphone_prefix" : "telephone_prefix",
-		  "profile_zip" : "zip"
-    };
-
-    var select_input = {
-      "sex" : "#profile_sex option:selected", 
-      "role" : "#inputStatus option:selected",
-      "id_business_building" : "#user_main_building option:selected"
-    }
-
-    const role_to_element_id = {
-      "USR" : "#USR_option",
-      "CO"  : "#CO_option",
-      "CA"  : "#CA_option",
-    }
-    
-    const sex_to_element_id = {
-      "Male"    : "#male_option",
-      "Female"  : "#female_option",
-      "Others"  : "#others_option",
-    }
 
     var id_to_modify;
     if($.urlParam('id') != null) {
@@ -346,88 +294,170 @@
       obj = JSON.parse(data);
       if (xhr.status == 200) {
         if (obj.data) {
-          expected_param.forEach((value) => {
-            if(obj.data[value] == null) {
-              alert("An error occurred. Field "+value+" is missing.");
-            } else {
-              userInformation[value] = obj.data[value];
-              Object.keys(text_field).forEach(key => {
-                $("#"+key).val(obj.data[text_field[key]]);
-              });
-            }
-          });
-          
-          $("#user_main_building [number = '"+obj.data["id_business_building"]+"']").attr('selected', '');
-
-          $(role_to_element_id[obj.data["role"]]).attr('selected', '');
-          
-          $(sex_to_element_id[obj.data["sex"]]).attr('selected', '');
+          userInformation["name"] = obj.data.name;
+          $("#profile_name").val(obj.data.name);
+          userInformation["surname"] = obj.data.surname;
+          $("#profile_surname").val(obj.data.surname);
+          userInformation["username"] = obj.data.username;
+          $("#profile_username").val(obj.data.username);
+          userInformation["email"] = obj.data.email;
+          $("#profile_email").val(obj.data.email);
+          userInformation["role"] = obj.data.role;
+          if (obj.data.role == "USR") {
+            $('#USR_option').attr('selected', '');
+          } else if (obj.data.role == "CO") {
+            $('#CO_option').attr('selected', '');
+          } else if (obj.data.role == "CA") {
+            //$('#CA_option').removeAttr("disabled");
+            $('#CA_option').attr('selected', '');
+          } else alert("This should not happen");
         }
+      } else if (obj.response == 5) {
+        alert("You are not loggedin.");
+        window.location.href = 'login.html';
+      } else if (obj.response == 7) {
+        alert("Error while intersecating information into the DB");
+      } else if (obj.response == 31) {
+        alert("You do not have the permission to see this page with the current settings (ERR-31)");
+      } else if (obj.response == 32) {
+        alert("You do not have the permission to see this page with the current settings (ERR-32)");
+      } else if (obj.response == 33) {
+        alert("Database Error (ERR-33)");
       } else {
-        alert("AAAA"); 
-        responseByID(obj.response); 
-        alert("PD");
+        alert("Error 1");
       }
     });
-    
-    var data = {
-      "name" : "",
-      "surname" : "",
-		  "birthdate" : "",
-		  "id_business_building" : "",
-		  "business_email" : "",
-		  "city" : "",
-		  "country" : "",
-		  "role" : "",
-		  "sex" : "",
-		  "street" : "",
-      "number" : "",
-		  "telephone" : "",
-		  "telephone_prefix" : "",
-		  "zip" : ""
-    };
+      
     $("#save_changes").click(function(){
-      $("#show_changes").empty();
-      Object.keys(text_field).forEach(key => {
-        if (userInformation[text_field[key]] != $("#"+key).val()) {
-          $("#show_changes").append('\
-            <div class="row"> \
-              <p>'+text_field[key]+' will be modified from <b>'+userInformation[text_field[key]]+'</b> to <b>'+$("#"+key).val()+'</b></p> \
-            </div>');
-          data[text_field[key]] = $("#"+key).val();
-        }
-      });
-      
-      Object.keys(select_input).forEach(key => {
-        if (userInformation[key] != $(select_input[key]).attr("number")) {
-          $("#show_changes").append('\
-            <div class="row"> \
-              <p>'+key+' will be modified from <b>'+userInformation[key]+'</b> to <b>'+$(select_input[key]).attr("number")+'</b></p> \
-            </div>');
-          data[key] = $(select_input[key]).attr("number");
-        }
-      });
-    });
+			var changed = 0;
+			if (userInformation["name"] != $("#profile_name").val()) {
+				if (changed == 0) {
+					$("#noEdit").hide();
+					$("#save_changes_confirm").removeAttr('disabled');
+					changed = 1;
+				}
+				$("#name_change_notification").show();
+				$("#oldName").text(userInformation["name"]);
+				$("#newName").text($("#profile_name").val());
+			} else {
+				$("#name_change_notification").hide();
+			}
+			if (userInformation["surname"] != $("#profile_surname").val()) {
+				if (changed == 0) {
+					$("#noEdit").hide();
+					$("#save_changes_confirm").removeAttr('disabled');
+					changed = 1;
+				}
+				$("#surname_change_notification").show();
+				$("#oldSurname").text(userInformation["surname"]);
+				$("#newSurname").text($("#profile_surname").val());
+			} else {
+				$("#surname_change_notification").hide();
+			}
+			if (userInformation["username"] != $("#profile_username").val()) {
+				if (changed == 0) {
+							$("#noEdit").hide();
+							$("#save_changes_confirm").removeAttr('disabled');
+							changed = 1;
+						}
+						$("#username_change_notification").show();
+						$("#oldUsername").text(userInformation["username"]);
+						$("#newUsername").text($("#profile_username").val());
+					} else {
+						$("#username_change_notification").hide();
+					}
+					if (userInformation["email"] != $("#profile_email").val()) {
+						if (changed == 0) {
+							$("#noEdit").hide();
+							$("#save_changes_confirm").removeAttr('disabled');
+							changed = 1;
+						}
+						$("#email_change_notification").show();
+						$("#oldEmail").text(userInformation["email"]);
+						$("#newEmail").text($("#profile_email").val());
+					} else {
+						$("#email_change_notification").hide();
+					}
 
-		$("#save_changes_confirm").click(function(){
-			$.post("set_info.php", 
-      { 
-      	set_function: "0",
-				id: $.urlParam('id'),
-      	data: JSON.stringify(data) 
-      },
-      
-      function(data, status) {
-        obj = JSON.parse(data);
-        if (obj.code == 41) {
-          alert("Something went wrong");
-        } else if (obj.code == 42) {
-          location.reload();
-        } else {
-          alert("Something went wrong (others)");
-        }
-      });
-		});
+           var newRole = $("#inputStatus option:selected").text();
+           if (userInformation["role"] != newRole) {
+						if (changed == 0) {
+							$("#noEdit").hide();
+							$("#save_changes_confirm").removeAttr('disabled');
+							changed = 1;
+						}
+						$("#role_change_notification").show();
+						$("#oldRole").text(userInformation["role"]);
+						$("#newRole").text(newRole);
+					} else {
+						$("#role_change_notification").hide();
+					}
+					
+					if (changed == 0) {
+						$("#noEdit").show();
+						$("#save_changes_confirm").attr('disabled', '');
+					}
+       	});
+
+				$("#save_changes_confirm").click(function(){
+					var changed = 0;
+					var data = {};
+					if (userInformation["name"] != $("#profile_name").val()) {
+						changed = 1;
+						data["name"] = $("#profile_name").val();
+					} else {
+						delete data["name"];
+					}
+					if (userInformation["surname"] != $("#profile_surname").val()) {
+						changed = 1;
+						data["surname"] = $("#profile_surname").val();
+					} else {
+						delete data["surname"];
+					}
+					if (userInformation["username"] != $("#profile_username").val()) {
+						changed = 1;
+						data["username"] = $("#profile_username").val();
+					} else{
+						delete data["username"];
+					}
+					if (userInformation["email"] != $("#profile_email").val()) {
+						changed = 1;
+						data["email"] = $("#profile_email").val();
+					} else {
+						delete data["email"];
+					}
+           if (userInformation["role"] != $("#inputStatus option:selected").text()) {
+						changed = 1;
+						data["role"] = $("#inputStatus option:selected").text();
+					} else {
+						delete data["role"];
+					}
+
+					if (changed == 0) {
+						alert("This should not happen");
+					} else {
+             $("#save_changes_confirm").attr('disabled', '');
+						$.post("set_info.php", 
+         		{ 
+           		set_function: "0",
+							id: $.urlParam('id'),
+           		data: JSON.stringify(data) 
+         		},
+         
+         		function(data, status) {
+               obj = JSON.parse(data);
+               // if (obj.status == 200) {
+                 if (obj.code == 41) {
+                   alert("Something went wrong");
+                 } else if (obj.code == 42) {
+                   location.reload();
+                 } else {
+                   alert("Something went wrong (others)");
+                 }
+               // }
+             });
+					}
+       	});
   });
 </script>
 </body>

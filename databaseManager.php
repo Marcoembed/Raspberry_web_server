@@ -63,14 +63,25 @@
          * @return array Description.
          */
         public function update_userinfo($field, $userid, $newvalue) {
-            $allowed_field = array("name", "surname", "username", "email");
-            $allowed_role = array("role");
+            $my_businessid = $_SESSION["BusinessId"];
+            $allowed_field = [
+                "birthdate", 
+                "sex", 
+                "street",
+                "number", 
+                "city", 
+                "zip", 
+                "country", 
+                "business_email", 
+                "telephone_prefix", 
+                "telephone",
+                //"Visitor",
+            ];
             
             if (array_search($field, $allowed_field) !== FALSE ) {
             
-                if ($stmt = $this->con->prepare('UPDATE userinfo SET '.$field.'=? WHERE id=?')) {
-                    // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
-                    $stmt->bind_param('si', $newvalue, $userid);
+                if ($stmt = $this->con->prepare('UPDATE userdetails SET '.$field.'=? WHERE user_id=? AND business_id=?')) {
+                    $stmt->bind_param('sii', $newvalue, $userid, $my_businessid);
                     $stmt->execute();
                     
                     if(mysqli_affected_rows($this->con))
@@ -92,6 +103,18 @@
                 } else {
                     $return_val = $this->set_role_in_business($userid, $_SESSION["BusinessId"], $newvalue);
                     $response = ["code" => $return_val];    
+                }
+            } else if ($field == "id_business_building") {
+                if ($stmt = $this->con->prepare('UPDATE business_people SET '.$field.'=? WHERE UserID=? AND BusinessID=?')) {
+                    $stmt->bind_param('sii', $newvalue, $userid, $my_businessid);
+                    $stmt->execute();
+                    
+                    if(mysqli_affected_rows($this->con))
+                        $response = ["code" => '42']; // Set the response to "Update OK"
+                    else 
+                        $response = ["code" => '41']; // Set the response to "Update not OK"		 
+                } else {
+                    $response = ["code" => '43'];
                 }
             } else {
                 $response = ["code" => '44'];
@@ -496,9 +519,14 @@
 
             // By using this query we will select all the workers by joining the table business_people and userinfo.
             // We can further filter those people depending on the business area (if business has multiple area and if the filter is active)
-            $sql = "SELECT `username`, `name`, `surname`, `email`, `role`, `userinfo`.`id` FROM `userinfo` ".
+            $sql = "SELECT `username`, `name`, `surname`, `role`, `userinfo`.`id`, ". 
+            "`userdetails`.`business_email`, `userdetails`.`telephone`, `userdetails`.`telephone_prefix`, `userdetails`.`street` ". 
+            "FROM `userinfo` ".
             "INNER JOIN `business_people` ON `userinfo`.`id`=`business_people`.`UserID` ".
-            "WHERE `business_people`.`BusinessID` = ".$my_businessid." AND `business_people`.`status`='active' ".
+            "INNER JOIN `userdetails` ON `userinfo`.`id` = `userdetails`.`user_id` ".
+            "WHERE `business_people`.`BusinessID` = ".$my_businessid." ".
+            "AND `userdetails`.`business_id` = ".$my_businessid." ". 
+            "AND `business_people`.`status`='active' ".
             "AND ".$sql3.
             "AND ".$sql2.
             "AND(CONCAT_WS (' ', `userinfo`.name, `userinfo`.surname) LIKE '%".$filter."%') ".
@@ -514,9 +542,11 @@
                 $array = [	"username"  => $row["username"], 
                             "name"      => $row["name"], 
                             "surname"   => $row["surname"], 
-                            "email"     => $row["email"],
+                            "role"      => $row['role'],
                             "id"        => $row['id'],
-                            "role"      => $row['role']
+                            "email"     => $row["email"],
+                            "phone_number" => $row['telephone_prefix'].$row['telephone'],
+                            "address"   => $row['street']
                         ];
 
                 $response["data"][$i] = $array;
@@ -570,11 +600,12 @@
         }
 
         /**
-         * Get user information.
+         * Get user information, releted to the current business.
          * 
          * @return array check "return" key. If 0 everything is ok, else error code.
          */
         function get_user_information($id) {
+            $my_businessid = $_SESSION["BusinessId"];
             $response["return"] = 1;
 
             if(!$this->check_worker_belong_to_business($id, $_SESSION["BusinessId"])) {
@@ -593,22 +624,51 @@
                 return $response;
             }
         
-            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
-            if ($stmt = $this->con->prepare('SELECT `username`, `name`, `surname`, `email` FROM userinfo WHERE id = ?')) {
-                $stmt->bind_param('s', $id);
+            $field_to_get = [
+                "birthdate", 
+                "sex", 
+                "street",
+                "number", 
+                "city", 
+                "zip", 
+                "country", 
+                "business_email", 
+                "telephone_prefix", 
+                "telephone",
+                "name",
+                "surname",
+                "username",
+                "email",
+                "role",
+                "Visitor",
+                "id_business_building",
+                "building_name"
+            ];
+
+            $sql = "SELECT ";
+            $sql .= implode(", ", $field_to_get);
+
+
+            $sql .=  " FROM `userdetails` ".
+            "INNER JOIN `business_people` ON `userdetails`.`user_id`=`business_people`.`UserID` ".
+            "INNER JOIN `userinfo` ON `userinfo`.`id` = `userdetails`.`user_id` ".
+            "INNER JOIN `business_building` ON `business_building`.`id` = `business_people`.`id_business_building` ".
+            "WHERE `business_people`.`BusinessID` = ".$my_businessid." ".
+            "AND `userdetails`.`business_id` = ".$my_businessid." ".
+            "AND `userinfo`.`id` = ?";
+
+            if ($stmt = $this->con->prepare($sql)) {
+                $stmt->bind_param('i', $id);
                 $stmt->execute();
                 
-                // Store the result so we can check if the account exists in the database.
-                $stmt->store_result();
-                if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($username, $name, $surname, $email);
-                    $stmt->fetch();
-                    $response["return"] = 0;
-                    $response["data"]["username"] 	= $username;
-                    $response["data"]["name"] 		= $name;
-                    $response["data"]["surname"] 	= $surname;
-                    $response["data"]["email"] 		= $email;
-                    $response["data"]["role"] 		= $role;
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc()) {
+                        $response["return"] = 0;
+                        foreach($field_to_get as $value) {
+                            $response["data"][$value] 	= $data[$value];
+                        }
+                    }
                 } else {
                     // Incorrect username
                     $response["return"] = 6;
@@ -731,6 +791,59 @@
         }
         
         /**
+         * Get total numer of workers and visitors belonging to a business. 
+         * 
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        function get_numer_of_workers() {
+            $response["return"] = 1;
+            $businessID = $_SESSION["BusinessId"];
+            
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            if ($stmt = $this->con->prepare('SELECT COUNT(*) as `count` FROM business_people 
+                    WHERE BusinessID = ? AND `status` = "active" AND `Visitor` = 0')) {
+                
+                $stmt->bind_param('i', $businessID);
+                $stmt->execute();
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["number_of_workers"] = $data["count"];
+                    }
+                } else {
+                    // This should not happen
+                    $response["return"] = 6;
+                    return $response;
+                }
+            }
+            
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            if ($stmt = $this->con->prepare('SELECT COUNT(*) as `count` FROM business_people 
+                    WHERE BusinessID = ? AND `status` = "active" AND `Visitor` = 1')) {
+                
+                $stmt->bind_param('i', $businessID);
+                $stmt->execute();
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["number_of_visitors"] = $data["count"];
+                    }
+                } else {
+                    // This should not happen
+                    $response["return"] = 6;
+                    return $response;
+                }
+            }
+            
+            return $response;
+            $stmt->close();
+        }
+        
+        /**
          * Create new business building.
          * 
          * @return array check "return" key. If 0 everything is ok, else error code.
@@ -780,6 +893,43 @@
             
             return $response;
             $stmt->close();
+        }
+        
+        /**
+         * Get the business belonging to the user.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_user_business($user_id) {
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            $sql = 'SELECT `BusinessID`, `name` FROM `business_people` 
+                INNER JOIN `business_info` ON `business_people`.`BusinessID` = `business_info`.`id` 
+                WHERE `UserID` = ? 
+                AND `status` = "active"';
+
+            if ($stmt = $this->con->prepare($sql)) {
+                // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+                $stmt->bind_param('i', $user_id);
+                $stmt->execute();
+                
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    $response["data"]["number_of_business"] = 0;
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["data"]["business"][$data["BusinessID"]]["business_name"] = $data["name"];
+                        $response["data"]["number_of_business"]++;
+                        $response["data"]["last_businessID"] = $data["BusinessID"];
+                    }
+                } else {
+                    // Incorrect username
+                    $response["return"] = 6;
+                    return $response;
+                }
+                return $response;
+                $stmt->close();
+            }
         }
     }
 
