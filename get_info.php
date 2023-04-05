@@ -330,6 +330,22 @@ if ($_POST["info_id"] == 13) {
 	}
 }
 
+// Get for which areas the user has permission
+if ($_POST["info_id"] == 14) {
+	$my_id = $_POST["id"];
+	$return = $database->get_user_area_permission($my_id);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = $return;
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
 echo (json_encode($response));
 
 ?>

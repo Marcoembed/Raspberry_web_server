@@ -14,6 +14,11 @@
     <!-- daterangVe picker -->
   <link rel="stylesheet" href="../../plugins/daterangepicker/daterangepicker.css">
 </head>
+<style>
+  #building_access_list ul {
+    margin-top: 0.3rem;
+  }
+</style>
 <body class="hold-transition sidebar-mini layout-fixed">
 <!-- Site wrapper -->
 <div class="wrapper">
@@ -183,6 +188,45 @@
           </div>
           <!-- /.card -->
         </div>
+        <div class="col-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">User Area Access Permission</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="login-box-msg">View/Modify User Area Permission</p>
+              <ul class="list-group" id="building_access_list">
+              </ul>
+              <div class="social-auth-links text-center mb-3">
+                <p>- OR -</p>
+              </div>
+              <p class="login-box-msg">Add User Area Permission</p>
+              <div class="form-group">
+                <label for="add_area_permission_select_main_building">Main Building</label>
+                <select id="add_area_permission_select_main_building" class="form-control">
+                
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="add_area_permission_select_area">Select an Area</label>
+                <select id="add_area_permission_select_main_building" class="form-control">
+                
+                </select>
+              </div>
+              <div class="form-group">
+					      <button type="button" class="btn btn-success float-right" id="add_area_permission" data-toggle="modal" data-target="#modal-add-area-permission">
+                  Add Area Permission
+					      </button>
+              </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+        </div>
       </div>
       <div class="row">
         <div class="col-12">
@@ -210,6 +254,50 @@
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 					<button type="button" class="btn btn-primary" id="save_changes_confirm">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	
+  <div class="modal fade" id="modal-add-area-permission">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Add Area Permission to the User</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="show_info_area">
+				
+        </div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" id="save_changes_confirm">Save changes</button>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+  
+  <div class="modal fade" id="modal-remove-area-permission">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content bg-danger">
+				<div class="modal-header">
+					<h4 class="modal-title">Confirm Remove Area Permission</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body" id="show_info_remove_area">
+				
+        </div>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-outline-light" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-outline-light" id="remove_area_permission_confirm">Save changes</button>
 				</div>
 			</div>
 			<!-- /.modal-content -->
@@ -253,6 +341,144 @@
         return results[1] || 0;
       }
     }
+
+    // -- Those functions are used for edit the user area permissions
+    var id_to_modify;
+    if($.urlParam('id') != null) {
+      id_to_modify = $.urlParam('id');
+    } else {
+      alert("ERRORE");
+      window.location.href = 'index.html';
+    }
+   
+    var areaInformation;
+    $.post("get_info.php", 
+    { 
+      info_id: "14",
+      id: id_to_modify
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+        areaInformation = JSON.parse(data);
+        if (obj.data) {
+          $.each( obj.data, function( key, value ) {
+            areas_array = obj.data[key].areas;
+            building_name = obj.data[key].building_name;
+            $("#building_access_list").append("<li class='list-group-item' number="+key+" type='building'>"+building_name+"</li>");
+            $("li[number="+key+"][type='building']").append("<ul class='list-group list-group-flush' type='areas' id_building="+key+" number=0></ul>");
+            var condition = true;
+            while(condition) {
+              condition = false;
+              $.each( areas_array, function( key1, value1 ) {
+                condition = true;
+                areas_id = key1;
+                access_granted = value1.access_granted;
+                area_name = value1.area_name;
+                whitelist = value1.whitelist;
+                parent_id = value1.parent_id;
+                if (parent_id == 0) {
+                  $("ul[id_building="+key+"][type='areas'][number='0']").append('<li class="list-group-item" area_id='+areas_id+' type="area"> \
+                    <div class="row"> \
+                      <div class="col-8"> \
+                      <div style="margin-right: 2.5em;">'+area_name+'</div> \
+                      </div> \
+                      <div class="col-4"> \
+                      <button data-toggle="modal" data-target="#modal-remove-area-permission" purpose="remove_permission" area="'+areas_id+'" type="button" class="btn btn-block btn-danger btn-xs float-right" style="width:60px;">Remove</button> \
+                      </div> \
+                    </div></li>');
+                    delete(obj.data[key].areas[key1]);
+                } else {
+                  if ($("li[type='area'][area_id='"+parent_id+"']").length) {
+                    $("li[type='area'][area_id='"+parent_id+"']").append('\
+                    <ul class="list-group"> \
+                      <li class="list-group-item" area_id='+areas_id+' type="area"> \
+                        <div class="row"> \
+                        <div class="col-8"> \
+                          <div style="margin-right: 2.5em;">'+area_name+'</div> \
+                        </div> \
+                        <div class="col-4"> \
+                          <button data-toggle="modal" data-target="#modal-remove-area-permission" purpose="remove_permission" area="'+areas_id+'" type="button" class="btn btn-block btn-danger btn-xs float-right" style="width:60px;">Remove</button> \
+           			        </div> \
+                        </div> \
+                      </li> \
+                    </ul>');
+                    delete(obj.data[key].areas[key1]);
+                  } 
+                }
+              });
+            }
+              
+          });
+        }
+      } else responseByID(obj.response);
+    });
+
+    function findParentAreas(area_id, building_id) {
+      var parent_areas = new Array();
+      var id_to_check = area_id;
+      while (true) {
+        var parent_id = areaInformation.data[building_id].areas[id_to_check].parent_id;
+        if (parent_id == 0) {
+          // parent_areas.push(id_to_check); 
+          break;
+        }
+        
+        id_to_check = parent_id;
+        parent_areas.push(parent_id); 
+      }
+      
+      return parent_areas;
+    }
+    
+    function findChildAreas(area_id, building_id) {
+      var child_areas = new Array();
+      var id_to_check = area_id;
+      while (true) {
+        var found = 0;
+        Object.keys(areaInformation["data"][building_id]["areas"]).forEach(index => {
+          var parent_id = areaInformation["data"][building_id]["areas"][index].parent_id;
+          if (parent_id == id_to_check) {
+            child_areas.push(index);
+            found = 1;
+            id_to_check = index;
+          }
+        });
+        if (!found)
+          break;
+      }
+      
+      return child_areas;
+    }
+    
+    $(document).on('click', "[purpose='remove_permission']", function(){
+      var area_id = $(this).parent().closest('li').attr("area_id");
+      var building_id = $(this).parent().closest('ul[type="areas"]').attr("id_building");
+      var area_name = areaInformation.data[building_id].areas[area_id].area_name;
+      var building_name = areaInformation.data[building_id].building_name;
+      var parent_array = findChildAreas(area_id, building_id);
+      $("#show_info_remove_area").empty();
+      $("#show_info_remove_area").append('\
+        <div class="row"> \
+          <p>You are trying to remove the permission for the Area <b>'+area_name+'</b> ('+area_id+') in the Building <b>'+building_name+'</b> ('+building_id+')!</p> \
+        </div>');
+      
+      if (parent_array.length != 0) {
+        $("#show_info_remove_area").append('\
+          <div class="row"> \
+            <p>This will remove also the access in the following areas: </p>\
+          </div><ul id="show_area_involved"></ul>');
+        $("#show_area_involved").empty();
+        parent_array.forEach(element => {
+          var area_name2 = areaInformation.data[building_id].areas[element].area_name;
+          $("#show_area_involved").append('<li>'+area_name2+'</li>');
+        });
+      }
+      
+    });
+
+    // -- END
     
     // -- This function is used to retrieve the information related to the business buildings
     var businessInformation = {
