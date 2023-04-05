@@ -931,6 +931,81 @@
                 $stmt->close();
             }
         }
+        
+        /**
+         * Get the area for which the user is allowed to enter.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_user_area_permission($user_id) {
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            $sql = 'SELECT `business_building`.`building_name`, `business_building`.`id` AS building_id, `business_areas`.`name`, `business_areas`.`id` as area_id, `whitelist_enabled`, `business_areas`.`parent_id`  
+                FROM `business_areas` 
+                INNER JOIN `business_building` ON `business_building`.`id` = `business_areas`.`business_building_id` 
+                WHERE `business_areas`.`business_id` = ?
+                ORDER BY `parent_id` ASC';
+            if ($stmt = $this->con->prepare($sql)) {
+                // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+                $stmt->bind_param('i', $_SESSION["BusinessId"]);
+                $stmt->execute();
+                //echo $sql;
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["data"][$data["building_id"]]["building_name"] = $data["building_name"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["area_name"] = $data["name"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["whitelist"] = $data["whitelist_enabled"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["parent_id"] = $data["parent_id"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["access_granted"] = 0;
+                    }
+                } else {
+                    // Incorrect username
+                    $response["return"] = 6;
+                    return $response;
+                }
+
+                foreach ($response["data"] as $key => $value) {
+                    foreach ($response["data"][$key]["areas"] as $key1 => $value) {
+                        $whitelist = $response["data"][$key]["areas"][$key1]["whitelist"];
+                        $sql1;
+                        if ($whitelist == 0) {
+                            // Whitelist not enabled, search in the blacklist
+                            $sql1 = "SELECT * FROM `business_area_blacklist` WHERE business_id = ? AND area_id = ? AND user_id = ?"; 
+                            $stmt = $this->con->prepare($sql1); 
+                            $stmt->bind_param('iii', $_SESSION["BusinessId"], $key1, $user_id);
+                            $stmt->execute();
+                
+                            ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                            if ($result->num_rows > 0) {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 0;
+                                unset($response["data"][$key]["areas"][$key1]);
+                            } else {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 1;
+                            }
+                        } else if ($whitelist == 1) {
+                            // Whitelist enabled, search in the whitelist
+                            $sql1 = "SELECT * FROM `business_area_whitelist` WHERE business_id = ? AND area_id = ? AND user_id = ?"; 
+                            $stmt = $this->con->prepare($sql1); 
+                            $stmt->bind_param('iii', $_SESSION["BusinessId"], $key1, $user_id);
+                            $stmt->execute();
+                
+                            ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                            if ($result->num_rows > 0) {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 1;
+                            } else {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 0;
+                                unset($response["data"][$key]["areas"][$key1]);
+                            }
+
+                        }
+                    }
+                }
+                return $response;
+                $stmt->close();
+            }
+        }
     }
 
     ?>
