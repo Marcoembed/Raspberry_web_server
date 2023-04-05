@@ -17,9 +17,7 @@
          * 
          * This function is called when the registration form compiled by the client is sent 
          * @param text $table Description: table where to insert values
-         * @param text $params Description: params for bind_param 
          * @param text $userarray Description: array of userinfo passed by the client
-         * @param text $clientinfo Description: userinfo passed by the client
          * @return 
          */
         public function add_userinfo($table, $userarray){
@@ -372,6 +370,44 @@
         
         }
 
+
+
+
+        /** 
+        *  
+        */
+
+        public function return_regex() {
+            
+            $sql =  "SELECT `regex_name`, `regex_surname` `regex_email`, `regex_username`, `regex_password`, `regex_codice_fiscale`, `regex_phone_number`, `regex_address` FROM `config`";
+            $result = $this->con->query($sql);
+            $response;
+        
+            if ($result->num_rows > 0) {
+                // output data of each row
+                while($row = $result->fetch_assoc()) {
+        
+                    $array = [  
+                                "regex_name"            => $row["regex_name"], 
+                                "regex_surname"         => $row["regex_surname"], 
+                                "regex_email"           => $row["regex_email"], 
+                                "regex_username"        => $row["regex_username"], 
+                                "regex_password"        => $row["regex_password"], 
+                                "regex_codice_fiscale"  => $row["regex_codice_fiscale"], 
+                                "regex_phone_number"    => $row["regex_phone_number"], 
+                                "regex_address"         => $row["regex_address"] 
+                    ];
+
+                    $response["data"] = $array;
+                    $response["return"] = 0;
+                    $i++;
+                }
+            } else {
+                $response["return"] = 37;
+            }
+
+            return $response;
+        }
 
 
         /**

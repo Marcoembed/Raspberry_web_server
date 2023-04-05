@@ -56,117 +56,134 @@ if ($database->init() == 2) {
 
 // content empty check
 
-if  (   !isset(
-	$_POST['name'],
-	$_POST['surname'],
-	$_POST['email'],
-	$_POST['username'],
-	$_POST['password'],
-	$_POST['password2'],
-	$_POST['codice_fiscale'],
-	$_POST['phone_number'],
-	$_POST['address'] 
-        ) 
-    ) 
-{
-	// Could not get the data that should have been sent.
-	$response = ["status" => '200', "response" => 'reg0'];
-	exit (json_encode($response));
-	// exit('Empty_Region');
-}
+if($_POST['info_id']==1){
 
-// content validation with REGEX
+	if  (   !isset(
+		$_POST['name'],
+		$_POST['surname'],
+		$_POST['email'],
+		$_POST['username'],
+		$_POST['password'],
+		$_POST['password2'],
+		$_POST['codice_fiscale'],
+		$_POST['phone_number'],
+		$_POST['address'] 
+	        ) 
+	    ) 
+	{
+		// Could not get the data that should have been sent.
+		$response = ["status" => '200', "response" => 'reg0'];
+		exit (json_encode($response));
+		// exit('Empty_Region');
+	}
 
-$client_info = array(
-	$_POST['name'],
-	$_POST['surname'],
-	$_POST['username'],
-	$_POST['password'],
-	$_POST['email'],
-	$_POST['codice_fiscale'],
-	$_POST['phone_number'],
-	$_POST['address'] 
-);
+	// content validation with REGEX
 
-// comparison check between password and password2
+	$client_info = array(
+		$_POST['name'],
+		$_POST['surname'],
+		$_POST['username'],
+		$_POST['password'],
+		$_POST['email'],
+		$_POST['codice_fiscale'],
+		$_POST['phone_number'],
+		$_POST['address'] 
+	);
 
-if(!password_comparison($_POST['password'], $_POST['password2'])){
-	echo 'passwords do not match';
-	$response = ["status" => '200', "response" => 'reg12'];
-	exit (json_encode($response));
-}
 
-// Prepare our SQL, preparing the SQL statement will prevent SQL injection.
-if ($stmt = $con->prepare('SELECT regex_name, regex_surname, regex_username, regex_password, regex_email, regex_codice_fiscale, regex_phone_number, regex_address FROM config')) {
-	// Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
-	$stmt->execute();
-	// Store the result so we can check if the account exists in the database.
-	$stmt->store_result();
-	if ($stmt->num_rows > 0) {
-		$stmt->bind_result($regex[0], $regex[1], $regex[2], $regex[3], $regex[4], $regex[5], $regex[6], $regex[7]);
-		$stmt->fetch();
-		foreach($client_info as $i=>$value){
-			if(preg_match($regex[$i], $value)){
-				$response = ["status" => '200', "response" => 'reg1'];
-			} else {
-				$response = ["status" => '200', "response" => 'reg'.$i+7];
-				//$response = ["status" => '200', "response" => $value];
+	// Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+	if ($stmt = $con->prepare('SELECT regex_name, regex_surname, regex_username, regex_password, regex_email, regex_codice_fiscale, regex_phone_number, regex_address FROM config')) {
+		// Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+		$stmt->execute();
+		// Store the result so we can check if the account exists in the database.
+		$stmt->store_result();
+		if ($stmt->num_rows > 0) {
+			$stmt->bind_result($regex[0], $regex[1], $regex[2], $regex[3], $regex[4], $regex[5], $regex[6], $regex[7]);
+			$stmt->fetch();
+			foreach($client_info as $i=>$value){
+				if(preg_match($regex[$i], $value)){
+					$response = ["status" => '200', "response" => 'reg1'];
+				} else {
+					$response = ["status" => '200', "response" => 'reg'.$i+7];
+					//$response = ["status" => '200', "response" => $value];
+					exit (json_encode($response));
+				}
+			}
+		$stmt->close();
+	}
+	
+	// comparison check between password and password2
+
+	if(!password_comparison($_POST['password'], $_POST['password2'])){
+		$response = ["status" => '200', "response" => 'reg15'];
+		exit (json_encode($response));
+	}
+
+
+	/* check if email, username, phone number, codice fiscale are already used */		
+
+	// sub-array for the database check
+
+	$checkuserinfo =array(
+		$_POST['email'],
+		$_POST['username'],
+		$_POST['codice_fiscale'],
+		//$_POST['phone_number'],
+	);
+
+	$userinfo =array(
+		'email',
+		'username',
+		'codice_fiscale',
+		//'phone_number',
+	);
+
+	foreach($checkuserinfo as $i=>$value){
+		$return = $database->check_userinfo_registration($userinfo[$i], $value);
+			if ($return == 0) {
+				$response = ["status" => '200', "response" => 'reg'.$i+2];//$value];
 				exit (json_encode($response));
+			} else {
+				$response = ["status" => '200', "response" => '0'];
 			}
 		}
-	$stmt->close();
-}
+	}
 
+	/* insert userinfo passed by the client in the database */
 
-/* check if email, username, phone number, codice fiscale are already used */		
+	$insert_userinfo= array(
+		"name",
+		"surname",
+		"username",
+		"password",
+		"email",
+		"codice_fiscale"
+	);
 
-// sub-array for the database check
-
-$checkuserinfo =array(
-	$_POST['email'],
-	$_POST['username'],
-	$_POST['codice_fiscale'],
-	//$_POST['phone_number'],
-);
-
-$userinfo =array(
-	'email',
-	'username',
-	'codice_fiscale',
-	//'phone_number',
-);
-
-foreach($checkuserinfo as $i=>$value){
-	$return = $database->check_userinfo_registration($userinfo[$i], $value);
-		if ($return == 0) {
-			$response = ["status" => '200', "response" => 'reg'.$i+2];//$value];
+	$return = $database->add_userinfo('userinfo',$insert_userinfo);
+		if ($return == 0){
+			$response = ["status" => '200', "response" => 'reg'.$i+17];
+			echo "error";
 			exit (json_encode($response));
 		} else {
 			$response = ["status" => '200', "response" => '0'];
+			echo "ok";
 		}
-	}
 }
 
-/* insert userinfo passed by the client in the database */
+if ($_POST["info_id"] == 0) {
+	$return = $database->return_regex();
 
-$insert_userinfo= array(
-	"name",
-	"surname",
-	"username",
-	"password",
-	"email",
-	"codice_fiscale"
-);
-
-$return = $database->add_userinfo('userinfo',$insert_userinfo);
-	if ($return == 0){
-		$response = ["status" => '200', "response" => 'reg'.$i+17];
-		echo "error";
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = ["data" => $return["data"]];
 		exit (json_encode($response));
 	} else {
-		$response = ["status" => '200', "response" => '0'];
-		echo "ok";
+		http_response_code(200);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
 	}
+}
 
 exit (json_encode($response));
 
