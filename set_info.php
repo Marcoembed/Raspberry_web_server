@@ -11,6 +11,13 @@ if(!isset($_SESSION['loggedin'])){
 	exit (json_encode($response));
 }
 
+$my_id;
+if ($_SESSION["playrole"] == 1) {
+	$my_id = $_SESSION["playrole_id"];
+} else {
+	$my_id = $_SESSION["id"];
+}
+
 $database = new DatabaseManager();
 if ($database->init() == 2) {
 	$response = ["code" => '2']; // Set the response to "Failed to connect to the Mysql Server"
@@ -138,6 +145,24 @@ if ($_POST["set_function"] == 5) {
 	];
 	
 	$return["response"] = $database->create_new_area($array_to_pass);
+
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
+/**
+ * Remove user area permission
+ */
+if ($_POST["set_function"] == 6) {
+	global $my_id;
+	$user_id = $_POST["id"];
+	$area_id = $_POST["area_id"];
+	$return["response"] = $database->remove_user_area_permission($user_id, $area_id, $my_id);
 
 	if ($return["response"] == 0) {
 		http_response_code(200);
