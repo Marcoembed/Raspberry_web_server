@@ -1211,8 +1211,79 @@
                             }
 
                         }
+                        if (empty($response["data"][$key]["areas"])) {
+                            unset($response["data"][$key]);
+                        }
                     }
                 }
+                return $response;
+                $stmt->close();
+            }
+        }
+        
+        /**
+         * Get all the area for which the user is not allowed to enter.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_user_area_no_permission($user_id, $business_id) {
+            $sql = 'WITH RECURSIVE tree_view AS (
+                    SELECT 
+    			    `business_areas`.`id` as "id",
+                    `business_areas`.name,
+                    `business_areas`.whitelist_enabled,
+                    `business_areas`.`business_id`,
+    				`business_areas`.`business_building_id`,
+    				`business_areas`.`parent_id`,
+                    0 as level 
+                    FROM `business_areas` 
+       				WHERE `business_areas`.`business_id` = ?
+    				AND `business_areas`.`parent_id` = 0
+    
+                    UNION ALL
+    
+                    SELECT 
+                    `business_areas`.`id`,
+                    `business_areas`.name,
+                    `business_areas`.whitelist_enabled,
+                    `business_areas`.`business_id`,
+    				`business_areas`.`business_building_id`,
+    				`business_areas`.`parent_id`,
+                    level + 1 AS level 
+                    FROM `business_areas` 
+                    JOIN tree_view tv 
+                    ON `business_areas`.`parent_id` = tv.id
+                    )
+
+                    SELECT
+                       `business_building_id`, `business_building`.`building_name`, 
+                       tree_view.`id`, `whitelist_enabled`, tree_view.`business_id`, 
+                       `name`, `level`, tree_view.`parent_id` 
+                    FROM tree_view INNER JOIN `business_building` ON `business_building`.`id` = tree_view.`business_building_id`
+                    ORDER BY tree_view.level DESC;';
+            if ($stmt = $this->con->prepare($sql)) {
+                $stmt->bind_param('i', $business_id);
+                $stmt->execute();
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["data"][$data["business_building_id"]]["building_name"] = $data["building_name"];
+                        $response["data"][$data["business_building_id"]]["areas"][$data["id"]]["area_name"] = $data["name"];
+                        $response["data"][$data["business_building_id"]]["areas"][$data["id"]]["parent_id"] = $data["parent_id"];
+                        $response["data"][$data["business_building_id"]]["areas"][$data["id"]]["level"] = $data["level"];
+
+                        $permission = $this->get_user_specific_area_permission($user_id, $data["id"]);
+                        if ($permission["return"] == 0) {
+                            unset($response["data"][$data["business_building_id"]]["areas"][$data["id"]]);
+                        }
+                    }
+                } else {
+                    $response["return"] = 6;
+                    return $response;
+                }
+
                 return $response;
                 $stmt->close();
             }
