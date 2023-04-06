@@ -346,6 +346,23 @@ if ($_POST["info_id"] == 14) {
 	}
 }
 
+// Get for which areas the user does not have permission
+if ($_POST["info_id"] == 15) {
+	$user_id = $_POST["id"];
+	global $my_businessid;
+	$return = $database->get_user_area_no_permission($user_id, $my_businessid);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = $return;
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
 echo (json_encode($response));
 
 ?>

@@ -46,7 +46,7 @@
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item"><a href="index.html">Home</a></li>
               <li class="breadcrumb-item active">Edit Profile</li>
             </ol>
           </div>
@@ -187,8 +187,18 @@
             <!-- /.card-body -->
           </div>
           <!-- /.card -->
+        
         </div>
-        <div class="col-6">
+      </div>
+      <div class="row">    
+        <div class="col-12">
+					<button type="button" class="btn btn-success float-right" id="save_changes" data-toggle="modal" data-target="#modal-xl">
+						  Save Changes
+					</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 col-sm-12">
           <div class="card card-primary">
             <div class="card-header">
               <h3 class="card-title">User Area Access Permission</h3>
@@ -200,6 +210,7 @@
             </div>
             <div class="card-body">
               <p class="login-box-msg">View/Modify User Area Permission</p>
+              <p id="no_permission_found">This Workers does not have any permission to enter in any area</p>
               <ul class="list-group" id="building_access_list">
               </ul>
               <div class="social-auth-links text-center mb-3">
@@ -209,12 +220,12 @@
               <div class="form-group">
                 <label for="add_area_permission_select_main_building">Main Building</label>
                 <select id="add_area_permission_select_main_building" class="form-control">
-                
+                <option selected></option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="add_area_permission_select_area">Select an Area</label>
-                <select id="add_area_permission_select_main_building" class="form-control">
+                <select id="add_area_permission_select_area" class="form-control">
                 
                 </select>
               </div>
@@ -226,13 +237,6 @@
             </div>
             <!-- /.card-body -->
           </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-12">
-					<button type="button" class="btn btn-success float-right" id="save_changes" data-toggle="modal" data-target="#modal-xl">
-						Save Changes
-					</button>
         </div>
       </div>
     </section>
@@ -270,7 +274,7 @@
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<div class="modal-body" id="show_info_area">
+				<div class="modal-body" id="show_info_add_area">
 				
         </div>
 				<div class="modal-footer justify-content-between">
@@ -352,6 +356,7 @@
     }
    
     var areaInformation;
+
     $.post("get_info.php", 
     { 
       info_id: "14",
@@ -366,10 +371,12 @@
           $.each( obj.data, function( key, value ) {
             areas_array = obj.data[key].areas;
             building_name = obj.data[key].building_name;
+            $("#no_permission_found").hide();
             $("#building_access_list").append("<li class='list-group-item' number="+key+" type='building'>"+building_name+"</li>");
             $("li[number="+key+"][type='building']").append("<ul class='list-group list-group-flush' type='areas' id_building="+key+" number=0></ul>");
             var condition = true;
-            while(condition) {
+            var counter = 0;
+            while(condition && counter < 1000) {
               condition = false;
               $.each( areas_array, function( key1, value1 ) {
                 condition = true;
@@ -408,29 +415,83 @@
                   } 
                 }
               });
+              counter++;
             }
               
           });
         }
       } else responseByID(obj.response);
     });
-
+    
+    var userNoPermission = new Array();
+    $.post("get_info.php", 
+    { 
+      info_id: "15",
+      id: id_to_modify
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+        userNoPermission.push(obj);
+        if (obj.data) {
+          $.each( obj.data, function( key, value ) {
+            $("#add_area_permission_select_main_building").append("<option number="+key+">"+value["building_name"]+"</option>")
+          });
+        }
+      } else responseByID(obj.response);
+    });
+    
     function findParentAreas(area_id, building_id) {
       var parent_areas = new Array();
       var id_to_check = area_id;
       while (true) {
-        var parent_id = areaInformation.data[building_id].areas[id_to_check].parent_id;
+        var parent_id = userNoPermission[0].data[building_id].areas[id_to_check].parent_id;
         if (parent_id == 0) {
           // parent_areas.push(id_to_check); 
           break;
         }
-        
         id_to_check = parent_id;
-        parent_areas.push(parent_id); 
+        if (userNoPermission[0]["data"][building_id]["areas"][id_to_check] !== undefined) {
+          parent_areas.push(parent_id); 
+        } else {
+          break;
+        }
       }
       
       return parent_areas;
     }
+    
+    $('#add_area_permission_select_main_building').change(function(){ 
+      $("#add_area_permission_select_area").empty();
+      $("#add_area_permission_select_area").append('<option number="0"></option>');
+      
+      var building_id = $("#add_area_permission_select_main_building option:selected" ).attr("number");
+      if (building_id == 0) {
+
+      } else {
+        $.each(userNoPermission[0].data[building_id]["areas"], function( key, value ) {
+          var level = value.level;
+          $("#add_area_permission_select_area").append('<option number='+key+'>'+"-".repeat(parseInt(level))+value["area_name"]+'</option>');
+        });
+      }
+    });
+
+    $("#add_area_permission").click(function() {
+      var building_id = $("#add_area_permission_select_main_building option:selected" ).attr("number");
+      var area_id = $("#add_area_permission_select_area option:selected" ).attr("number");
+
+      if(building_id == 0 || area_id == 0) {
+        $("#modal-add-area-permission").modal("hide");
+      } else {
+        var parents = findParentAreas(area_id, building_id);
+        $("#show_info_add_area").empty();
+        $.each(parents, function(key, value) {
+          $("#show_info_add_area").append("<div class='row'>You will add the permission also for "+userNoPermission[0].data[building_id]["areas"][value]["area_name"]+"</div>");
+        });
+      }
+    });
+
     
     function findChildAreas(area_id, building_id) {
       var child_areas = new Array();
@@ -444,6 +505,10 @@
             found = 1;
             id_to_check = index;
           }
+          // if (child_areas.includes(parent_id)) {
+          //   child_areas.push(index);
+          //   found = 1;
+          // }
         });
         if (!found)
           break;
@@ -452,8 +517,10 @@
       return child_areas;
     }
     
+    var remove_area_id = null;
     $(document).on('click', "[purpose='remove_permission']", function(){
       var area_id = $(this).parent().closest('li').attr("area_id");
+      remove_area_id = area_id;
       var building_id = $(this).parent().closest('ul[type="areas"]').attr("id_building");
       var area_name = areaInformation.data[building_id].areas[area_id].area_name;
       var building_name = areaInformation.data[building_id].building_name;
@@ -476,6 +543,25 @@
         });
       }
       
+    });
+		
+    $("#remove_area_permission_confirm").click(function(){
+      if (remove_area_id != null) {
+			  $.post("set_info.php", 
+        { 
+       	  set_function: "6",
+			  	area_id: remove_area_id,
+          id: id_to_modify 
+        },
+
+        function(data, status, xhr) {
+          if (xhr.status == 200) {
+            location.reload();
+          } else {
+            obj = JSON.parse(data);
+          }
+        });
+      }
     });
 
     // -- END
