@@ -12,11 +12,13 @@ if(!isset($_SESSION['loggedin'])){
 }
 
 $my_id;
+$my_businessid;
 if ($_SESSION["playrole"] == 1) {
 	$my_id = $_SESSION["playrole_id"];
 } else {
 	$my_id = $_SESSION["id"];
 }
+$my_businessid = $_SESSION["BusinessId"];
 
 $database = new DatabaseManager();
 if ($database->init() == 2) {
@@ -163,6 +165,25 @@ if ($_POST["set_function"] == 6) {
 	$user_id = $_POST["id"];
 	$area_id = $_POST["area_id"];
 	$return["response"] = $database->remove_user_area_permission($user_id, $area_id, $my_id);
+
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
+/**
+ * Add User Area Permission
+ */
+if ($_POST["set_function"] == 7) {
+	global $my_id;
+	global $my_businessid;
+	$user_id = $_POST["id"];
+	$area_id = $_POST["area_id"];
+	$return["response"] = $database->add_user_area_permission($user_id, $area_id, $my_id, $my_businessid);
 
 	if ($return["response"] == 0) {
 		http_response_code(200);

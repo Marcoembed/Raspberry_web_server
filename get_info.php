@@ -30,7 +30,7 @@ if (is_numeric($my_role) === FALSE) {
 
 } else {
 	http_response_code(400);
-	$response["response"] = $information;
+	$response["response"] = 0;
 	if ($_POST["info_id"] != 13) {
 		exit (json_encode($response));
 	}
