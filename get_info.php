@@ -107,18 +107,6 @@ if ($_POST["info_id"] == 3) {
 	$id;
 	global $my_id;
 	global $my_role;
-	if ($_POST["id"] == 0) { // You are requesting information about yourself
-		$id = $_SESSION["id"];
-	} else {
-		$id = $_POST["id"];
-		if(!check_permission_role($my_id, $_SESSION["BusinessId"], "CO", $my_role)) {
-			http_response_code(400);
-			$return["response"] = 31;
-			exit(json_encode($return));
-		}
-	}
-	$return = $database->get_user_information($id);
-
 	$allowed_fields = [
 		//"birthdate",
 		"name",
@@ -135,6 +123,19 @@ if ($_POST["info_id"] == 3) {
 		"telephone_prefix",
 		"zip"
 	];
+	
+	if ($_POST["id"] == 0) { // You are requesting information about yourself
+		$id = $_SESSION["id"];
+		array_push($allowed_fields, "username", "email");
+	} else {
+		$id = $_POST["id"];
+		if(!check_permission_role($my_id, $_SESSION["BusinessId"], "CO", $my_role)) {
+			http_response_code(400);
+			$return["response"] = 31;
+			exit(json_encode($return));
+		}
+	}
+	$return = $database->get_user_information($id);
 
 	if ($return["return"] == 0) {
 		http_response_code(200);

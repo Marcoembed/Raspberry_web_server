@@ -194,4 +194,65 @@ if ($_POST["set_function"] == 7) {
 	exit (json_encode($return));	
 }
 
+/**
+ * Manage Visitors 
+ */
+if ($_POST["set_function"] == 8) {
+	$expected_parameters = [
+		"CF" 			=> "#visitor_CF",
+		"username" 		=> "#visitor_username",
+		"badge" 		=> "#visitor_badge",
+		"expiration" 	=> "#visitor_expiration"
+	];
+	
+	$parameters = [
+		"CF" 			=> "",
+		"username" 		=> "",
+		"badge" 		=> "",
+		"expiration" 	=> ""
+	];
+	global $my_id;
+	global $my_businessid;
+
+	foreach ($expected_parameters as $key => $value) {
+		$parameters[$key] = $_POST["inputs"][$value];
+	}
+
+	// Check CF or Username
+	if ($parameters["CF"] != "") {
+		// Check CF
+		if ($database->check_userinfo_registration("CF", $parameters["CF"])) {
+			// CF Not Found!
+			$return["response"] = "CF Not Found";
+			http_response_code(200);
+			exit (json_encode($return));	
+		}
+	} else {
+		// Check Username
+		if ($database->check_userinfo_registration("username", $parameters["username"])) {
+			// Username Not Found!
+			$return["response"] = "Username Not Found";
+			http_response_code(200);
+			exit (json_encode($return));	
+		}
+	}
+
+	// Check if the Badge Exist
+	if ($database->get_badge_info($parameters["badge"], $my_businessid)["return"]) {
+		// Badge Not Found!
+		$return["response"] = "Badge Not Found";
+		http_response_code(200);
+		exit (json_encode($return));	
+	}
+
+	$return["response"] = 0;
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit(json_encode($return));
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
 ?>

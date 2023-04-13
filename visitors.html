@@ -8,11 +8,12 @@
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
 </head>
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini sidebar-collapse">
 <!-- Site wrapper -->
 <div class="wrapper">
   
@@ -50,15 +51,110 @@
     <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
-      
+        <div class="row">
+          <div class="col-12">
+            <div class="callout callout-info">
+              <h5>Here you can add a visitor!</h5>
+              <p>The visitor should be already registered to the system. You need to know the CF or the Username of the Visitor.</p>
+              <p>You should also have some already registered badge to be given to the visitor. Otherwise you need to register a new badge first.</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Add new Visitor</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-sm-12 col-md">
+                      <div class="input-group mb-2 mr-sm-2">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text"><i class="fas fa-address-card"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="visitor_CF" placeholder="CF">
+                        <div class="valid-feedback">
+                          Ok
+                        </div>
+                        <div class="invalid-feedback">
+                          Error.
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-sm-12 col-md-2 text-center">
+                      <label class="">- OR -</label>
+                    </div>
+                    <div class="col-sm-12 col-md">
+                      <div class="input-group mb-2 mr-sm-2">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="visitor_username" placeholder="Username">
+                        <div class="valid-feedback">
+                          Ok
+                        </div>
+                        <div class="invalid-feedback">
+                          Error.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="visitor_username">Badge Internal Code</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                    </div>
+                    <input type="text" class="form-control" id="visitor_badge">
+                    <div class="valid-feedback">
+                      Ok
+                    </div>
+                    <div class="invalid-feedback">
+                      Error.
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Expiration Date</label>
+                  <div class="input-group" id="datetimepicker1" data-target-input="nearest">
+                      <div class="input-group-prepend" data-target="#datetimepicker1" data-toggle="datetimepicker">
+                          <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                      </div>
+                      <input type="text" id="visitor_expiration" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
+                      <div class="valid-feedback">
+                        Ok
+                      </div>
+                      <div class="invalid-feedback">
+                        Error.
+                      </div>
+                  </div>
+                </div>
+                <div class="form-group">
+					        <button type="button" class="btn btn-success float-right" id="add_visitor">
+					        	Add Visitor
+					        </button>
+                </div>
+            </div>
+            <!-- /.card-body -->
+          </div>
+          </div>
+        </div>
       </div>
     </section>
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
 
-  <footer class="main-footer" id="footer_container">
-  </footer>
+  <div id="footer_container">
+  </div>
 </div>
 <!-- ./wrapper -->
 
@@ -68,15 +164,143 @@
 <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="dist/js/adminlte.min.js"></script>
+<script src="plugins/moment/moment.min.js"></script>
+<script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
 
 <!-- Page specific script -->
 <script>
   $("#sidebar_container").load("sidebar_CA.html");
   $("#navbar_container").load("navbar_CA.html");
   $("#footer_container").load("footer.html");
+
+  $(function () {
+    $('#datetimepicker1').datetimepicker();
+  });
   
+  var inputs = {
+    "#visitor_CF"         : "",
+    "#visitor_username"   : "",
+    "#visitor_badge"      : "",
+    "#visitor_expiration" : ""
+  }
+  
+  var check_empty = {
+    "#visitor_badge"      : "",
+    "#visitor_expiration" : ""
+  }
+
+  var errors_from_server = {
+    "CF Not Found"        : "#visitor_CF",
+    "Username Not Found"  : "#visitor_username", 
+    "Badge Not Found"     : "#visitor_badge" 
+  }
+  
+  var errors_from_server_text = {
+    "CF Not Found"        : "CF Not Found",
+    "Username Not Found"  : "Username Not Found", 
+    "Badge Not Found"     : "Badge Not Found" 
+  }
+
   $(document).ready(function(){
-  
+    // This code will disable the username field if the user starts typing on the CF field, or viceversa
+    $("#visitor_CF").on("input", function(){
+        var visitor_CF = $("#visitor_CF").val();
+        var visitor_username = $("#visitor_username").val();
+        if (visitor_CF != "") {
+          $("#visitor_username").attr("disabled", '');
+        } else {
+          $("#visitor_username").removeAttr("disabled");
+        }
+    });
+    
+    $("#visitor_username").on("input", function(){
+        var visitor_CF = $("#visitor_CF").val();
+        var visitor_username = $("#visitor_username").val();
+        if (visitor_username != "") {
+          $("#visitor_CF").attr("disabled", '');
+        } else {
+          $("#visitor_CF").removeAttr("disabled");
+        }
+    });
+
+    // This code will be called when the user clicks on the "Add Visitor" button
+    $("#add_visitor").click(function () {
+      var errorFound = 0;
+      
+      // Empty Check
+      $.each(check_empty, function (key, value) {
+        inputs[key] = $(key).val();
+        if (inputs[key] == "") {
+          $(key).removeClass("is-valid");
+          $(key).addClass("is-invalid");
+          $(key).siblings(".invalid-feedback").text("This field is empty");
+          errorFound = 1;
+          return true;
+        }
+
+        $(key).removeClass("is-invalid");
+      });
+
+      // Empty Check specific for this page, check if CF or username is empty
+      var visitor_CF = $("#visitor_CF").val();
+      var visitor_username = $("#visitor_username").val();
+      if (visitor_CF == "") {
+        if(visitor_username == "") {
+          $("#visitor_CF").removeClass("is-valid");
+          $("#visitor_CF").addClass("is-invalid");
+          $("#visitor_CF").siblings(".invalid-feedback").text("Please specify a CF or a Username");
+          $("#visitor_username").removeClass("is-valid");
+          $("#visitor_username").addClass("is-invalid");
+          $("#visitor_username").siblings(".invalid-feedback").text("Please specify a CF or a Username");
+          errorFound = 1;
+        } else {
+          inputs["#visitor_username"] = visitor_username;
+          inputs["#visitor_CF"] = visitor_CF;
+          $("#visitor_CF").removeClass("is-invalid");
+          $("#visitor_username").removeClass("is-invalid");
+        }
+      } else {
+        if (visitor_username != "") {
+          $("#visitor_CF").removeClass("is-valid");
+          $("#visitor_CF").addClass("is-invalid");
+          $("#visitor_CF").siblings(".invalid-feedback").text("Please specify a CF or a Username");
+          $("#visitor_username").removeClass("is-valid");
+          $("#visitor_username").addClass("is-invalid");
+          $("#visitor_username").siblings(".invalid-feedback").text("Please specify a CF or a Username");
+          errorFound = 1;
+        } else {
+          inputs["#visitor_username"] = visitor_username;
+          inputs["#visitor_CF"] = visitor_CF;
+          $("#visitor_CF").removeClass("is-invalid");
+          $("#visitor_username").removeClass("is-invalid");
+        }
+      }
+
+      if (errorFound) {
+        return false;
+      } 
+
+      //$("#add_visitor").attr("disabled", '');
+
+      $.post("set_info.php", 
+      {
+        set_function: "8",
+        inputs
+      },
+
+      function(data, status, xhr) {
+          var obj = JSON.parse(data);
+          $("#add_visitor").removeAttr("disabled");
+          if (errors_from_server[obj.response] != null) {
+            var selector = errors_from_server[obj.response];
+            var error_text = errors_from_server_text[obj.response];
+            $(selector).removeClass("is-valid");
+            $(selector).addClass("is-invalid");
+            $(selector).siblings(".invalid-feedback").text(error_text);
+            return false;
+          }
+      });
+    });
   });
 </script>
 </body>

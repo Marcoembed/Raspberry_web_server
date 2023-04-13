@@ -1417,6 +1417,29 @@
                 $stmt->close();
             }
         }
+        /**
+         * Get the badge info from Badge Pseudo Code.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_badge_info($badge_code, $business_id) {
+            if ($stmt = $this->con->prepare("SELECT * FROM `business_badge` WHERE `badge_code` = ? AND `business_id` = ?")) {
+                $stmt->bind_param('si', $badge_code, $business_id);
+                $stmt->execute();
+
+                $result = $stmt->get_result();
+                if($result->num_rows == 0) {
+                    $response["return"] = 1; 
+                    return $response;
+                }
+                else {
+                    $row = $result->fetch_assoc();
+                    $response["return"] = 0;
+                    array_push($response, $row);
+                    return $response;
+                }
+            }
+        }
         
     }
 
