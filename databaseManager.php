@@ -152,6 +152,335 @@
         }
         
         /**
+         * Get user specific area permission.
+         *
+         * @param int $user_id The ID of the user
+         * @param int $area_id The ID of the area to check
+         * @return array check "return" key. If 0 everything is ok, else 1 if no permission, else error code.
+         */
+        public function get_user_specific_area_permission($user_id, $area_id) {
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            $sql1 = 'SELECT COUNT(*) as `count`
+                    FROM `business_areas` 
+                    INNER JOIN `business_area_blacklist_whitelist` ON `business_area_blacklist_whitelist`.`area_id` = `business_areas`.`id` 
+                    WHERE `business_areas`.`id` = ?
+                    AND `business_areas`.`whitelist_enabled` = `business_area_blacklist_whitelist`.`whitelist`
+                    AND `business_area_blacklist_whitelist`.`user_id` = ?
+                    AND `business_area_blacklist_whitelist`.`status` = "active"';
+            $sql = 'SELECT 
+                    	`business_areas`.`whitelist_enabled` 
+                    FROM `business_areas` 
+                    WHERE `business_areas`.`id` = ?';
+            if ($stmt = $this->con->prepare($sql)) {
+                $stmt->bind_param("i", $area_id);
+                $stmt->execute();
+                //echo $sql;
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    // The area exists, should be unique because id is unique.
+                    $data = $result->fetch_assoc();
+                    if ($stmt = $this->con->prepare($sql1)) {
+                        $stmt->bind_param("ii", $area_id, $user_id);
+                        $stmt->execute();
+                        //echo $sql;
+                        ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                        if ($result->num_rows > 0) {
+                            $data_count = $result->fetch_assoc();
+                            if ($data["whitelist_enabled"] == 0) {
+                                // Blacklist method
+                                if($data_count["count"]) {
+                                    // Found an entry. The user has no permission to enter this area (black list)
+                                    $response["return"] = 1; // No permission
+                                } else {
+                                    $response["return"] = 0;
+                                }
+                            } else {
+                                // Whitelist method, function not developed yet.
+                                $response["return"] = 8;
+                                return $response;
+                            }
+                        } else {
+                            $response["return"] = 9;
+                            return $response;
+                        }
+                    } else {
+                        $response["return"] = 6;
+                        return $response;
+                    }
+                } else {
+                    $response["return"] = 7;
+                    return $response;
+                }
+                return $response;
+                $stmt->close();
+            }
+        }
+
+        // /**
+        //  * Find first level children area for a given area
+        //  * 
+        //  * @return array Containing all the first level children area. If the array is empty, no children found.
+        //  */
+        // private function findChildrenAreas($area_id) {
+        //     $children_id;
+        //     $sql =  "SELECT `id` FROM `business_areas` WHERE `parent_id` = ?";
+        //     if ($stmt = $this->con->prepare($sql)) {
+        //         $stmt->bind_param('ii', $id, $businessid);
+        //         $stmt->execute();
+        //         $result = $stmt->get_result();
+        //         if($result->num_rows) {
+        //             while($data = $result->fetch_assoc()) {
+        //                 array_push($children_id, $data["id"]);
+        //             } 
+        //         } else {
+        //             return $children_id;
+        //         }
+        //         return $children_id;
+        //     }
+        // }
+        
+        // /**
+        //  * Find all children area for a given area
+        //  * 
+        //  * @return array Containing all the children area. If the array is empty, no children found.
+        //  */
+        // private function findAllChildrenAreas($area_id) {
+        //     $children_id;
+        // }
+        
+        /**
+         * Remove the permission of an area (and children) to an user.
+         *
+         * Description.
+         *
+         * @param int   $user_id             Description.
+         * @param int   $area_id     Description.
+         * @param text  $role           Description.
+         * 
+         * @return int 0 if everything is ok.
+         */
+        public function remove_user_area_permission($user_id, $area_id, $doneby_id) {
+            $parent_id = $area_id;
+            // We need a function to find all the children area starting from an area.
+            // The algorithm should find all the areas having as parent id the area 
+            // and then procede recursively.
+            // I'm not able to fully understand the following SQL
+            $sql = "WITH RECURSIVE tree_view AS (
+                        SELECT `business_areas`.`id` as 'id',
+                        `business_areas`.name,
+                        `business_areas`.whitelist_enabled,
+                        `business_areas`.`business_id`,
+                        0 as level 
+                        FROM `business_areas` 
+                        WHERE `id` = ?
+    
+                        UNION ALL
+    
+                        SELECT 
+                        `business_areas`.`id`,
+                        `business_areas`.name,
+                        `business_areas`.whitelist_enabled,
+                        `business_areas`.`business_id`,
+                        level + 1 AS level 
+                        FROM `business_areas` 
+                        JOIN tree_view tv 
+                        ON `parent_id` = tv.id
+                    )
+
+                    SELECT
+                       `id`, `whitelist_enabled`, `business_id`
+                    FROM tree_view;";
+            
+            $sql3 = "   SELECT COUNT(*) as count 
+                        FROM `business_area_blacklist_whitelist` 
+                        WHERE user_id = ? 
+                        AND area_id = ?";
+            
+            if (!($stmt = $this->con->prepare($sql))) {
+                $response = 41; // Set the response to "Update not OK"
+                return $response;	
+            }
+            
+            $stmt->bind_param('i', $area_id);
+            $stmt->execute();
+            
+            ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+            if ($result->num_rows == 0) {
+                $response = 6;
+                return $response;
+            }
+            
+            while($data = $result->fetch_assoc())
+            {
+                if ($data["whitelist_enabled"] == 0) {
+                    // Black list enabled, add user to the black list
+                    // We need to check before if this user already does not have the permission to enter this area
+                    $permission = $this->get_user_specific_area_permission($user_id, $data["id"]);
+                    if ($permission["return"] == 0) {
+                        // The user has the permission to enter, so we should check if it in the blacklist as removed.
+                        if (!($stmt = $this->con->prepare($sql3))) {
+                            $response = 6;
+                            return $response;
+                        }
+                        
+                        $stmt->bind_param("ii", $user_id, $data["id"]);
+                        $stmt->execute();
+                        
+                        ($result1 = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                        $data1 = $result1->fetch_assoc();
+                        if ($data1["count"] == 1) {
+                            // Entry found, do an update query
+                            $sql2 ="UPDATE `business_area_blacklist_whitelist` 
+                                    SET `status`='active', `last_edit`=NOW(), `last_edit_by`= ? 
+                                    WHERE `area_id` = ? AND `user_id` = ?";
+                            
+                            if (!($stmt = $this->con->prepare($sql2))) {
+                                $response = 6;
+                                return $response;
+                            }
+                            
+                            $stmt->bind_param("iii", $doneby_id, $data["id"], $user_id);
+                            $stmt->execute();
+                        }
+                        else if ($data1["count"] == 0) {
+                            // Entry not found, do an insert query
+                            $sql2 = "INSERT INTO `business_area_blacklist_whitelist` (`id`, `whitelist`, `business_id`, `area_id`, `user_id`, `status`, `last_edit`, `last_edit_by`) 
+                            VALUES (NULL, 0, ?, ?, ?, 'active', NOW(), ?);";
+                            if (!($stmt = $this->con->prepare($sql2))) {
+                                $response = 6;
+                                return $response;
+                            }
+                            
+                            $stmt->bind_param("iiii", $data["business_id"], $data["id"], $user_id, $doneby_id);
+                            $stmt->execute();
+                        } else {
+                            // Generic Error
+                            $response = 8;
+                            return $response;
+                        }
+
+                    }
+                    // } else {
+                    //     // Function not developed yet
+                    //     $response = 8;
+                    //     echo json_encode($permission);
+                    //     return $response;
+                    // }
+                } else {
+                    // Function not developed yet
+                    $response = 7;
+                    return $response;
+                }
+            }
+            $response = 0;
+            return 0;
+        }
+        
+        /**
+         * This function allows to add the access permission to an area by an user.
+         *
+         * If this area is inside another area, the permission to all the parent area will be granted.
+         *
+         * @param int   $user_id     Description.
+         * @param int   $area_id     Description.
+         * @param int   $doneby_id   Description.
+         * 
+         * @return int 0 if everything is ok.
+         */
+        public function add_user_area_permission($user_id, $area_id, $doneby_id, $business_id) {
+            $sql = "WITH RECURSIVE tree_view AS (
+                        SELECT 
+                        `business_areas`.`id` as 'id',
+                        `business_areas`.name,
+                        `business_areas`.whitelist_enabled,
+                        `business_areas`.`business_id`,
+                        `business_areas`.`parent_id`,
+                        0 as level 
+                        FROM `business_areas` 
+                        WHERE `id` = ?
+
+                        UNION ALL
+
+                        SELECT 
+                        `business_areas`.`id`,
+                        `business_areas`.name,
+                        `business_areas`.whitelist_enabled,
+                        `business_areas`.`business_id`,
+                        `business_areas`.`parent_id`,
+                        level - 1 AS level 
+                        FROM `business_areas` 
+                        JOIN tree_view tv 
+                        ON `business_areas`.`id` = tv.parent_id
+                    )
+
+                    SELECT
+                       `id`, `name`, `whitelist_enabled`, `business_id`
+                    FROM tree_view;";
+
+            if ($stmt = $this->con->prepare($sql)) {
+                $stmt->bind_param('i', $area_id);
+                $stmt->execute();
+                
+                //echo $sql;
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    {
+                        $permission = $this->get_user_specific_area_permission($user_id, $data["id"]);
+                        if ($permission["return"] == 0) {
+                            // User has the permission for this area
+                            continue;
+                        } else if ($permission["return"] == 1) {
+                            // User has no permission for this area
+                            if ($data["whitelist_enabled"] == 1) {
+                                // Not developed yet
+
+                            } else if ($data["whitelist_enabled"] == 0) {
+                                // We should "remove" the user from the blacklist
+                                $sql2 = "   UPDATE `business_area_blacklist_whitelist` 
+                                            SET `status`='removed', `last_edit`=NOW(),
+                                            `last_edit_by`= ? 
+                                            WHERE `area_id` = ? AND `user_id` = ?";
+                                if ($stmt = $this->con->prepare($sql2)) {
+                                    $stmt->bind_param('iii', $doneby_id, $data["id"], $user_id);
+                                    $stmt->execute();
+                                    // echo $sql2;
+                                    if(mysqli_affected_rows($this->con) == 1) {
+                                        $response = 0;
+                                    } else {
+                                        // Generic error
+                                        $response = 10;
+                                        return $response;
+                                    }
+                                } else {
+                                    $response = 9;
+                                    return $response;
+                                }
+                            } else {
+                                // Generic error
+                                $response = 8;
+                                return $response;
+                            }
+                        } else {
+                            // Generic error
+                            $response = 7;
+                            return $response;
+                        }
+                    }
+                    return 0;
+                } else {
+                    $response = 6;
+                    return $response;
+                }
+            } else {
+                $response = 41; // Set the response to "Update not OK"	
+            }
+            $stmt->close();
+            return $response;
+        
+        }
+        
+        /**
          * Set Role of an User in a Business.
          *
          * Description.
@@ -608,7 +937,7 @@
                             "surname"   => $row["surname"], 
                             "role"      => $row['role'],
                             "id"        => $row['id'],
-                            "email"     => $row["email"],
+                            "email"     => $row["business_email"],
                             "phone_number" => $row['telephone_prefix'].$row['telephone'],
                             "address"   => $row['street']
                         ];
@@ -995,6 +1324,187 @@
                 $stmt->close();
             }
         }
+        
+        /**
+         * Get all the area for which the user is allowed to enter.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_user_area_permission($user_id) {
+            // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
+            $sql = 'SELECT `business_building`.`building_name`, `business_building`.`id` AS building_id, `business_areas`.`name`, `business_areas`.`id` as area_id, `whitelist_enabled`, `business_areas`.`parent_id`  
+                FROM `business_areas` 
+                INNER JOIN `business_building` ON `business_building`.`id` = `business_areas`.`business_building_id` 
+                WHERE `business_areas`.`business_id` = ?
+                ORDER BY `parent_id` ASC';
+            if ($stmt = $this->con->prepare($sql)) {
+                // Bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+                $stmt->bind_param('i', $_SESSION["BusinessId"]);
+                $stmt->execute();
+                //echo $sql;
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["data"][$data["building_id"]]["building_name"] = $data["building_name"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["area_name"] = $data["name"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["whitelist"] = $data["whitelist_enabled"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["parent_id"] = $data["parent_id"];
+                        $response["data"][$data["building_id"]]["areas"][$data["area_id"]]["access_granted"] = 0;
+                    }
+                } else {
+                    // Incorrect username
+                    $response["return"] = 6;
+                    return $response;
+                }
+
+                foreach ($response["data"] as $key => $value) {
+                    foreach ($response["data"][$key]["areas"] as $key1 => $value) {
+                        $whitelist = $response["data"][$key]["areas"][$key1]["whitelist"];
+                        $sql1;
+                        if ($whitelist == 0) {
+                            // Whitelist not enabled, search in the blacklist
+                            $sql1 = "   SELECT * FROM `business_area_blacklist_whitelist` 
+                                        WHERE business_id = ? 
+                                        AND area_id = ? 
+                                        AND user_id = ? 
+                                        AND whitelist = 0
+                                        AND status = 'active'"; 
+                            $stmt = $this->con->prepare($sql1); 
+                            $stmt->bind_param('iii', $_SESSION["BusinessId"], $key1, $user_id);
+                            $stmt->execute();
+                
+                            ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                            if ($result->num_rows > 0) {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 0;
+                                unset($response["data"][$key]["areas"][$key1]);
+                            } else {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 1;
+                            }
+                            //echo ($sql1);
+                        } else if ($whitelist == 1) {
+                            // Whitelist enabled, search in the whitelist
+                            $sql1 = "   SELECT * FROM `business_area_blacklist_whitelist` 
+                                        WHERE business_id = ? 
+                                        AND area_id = ? 
+                                        AND user_id = ? 
+                                        AND whitelist = 1 
+                                        AND status = 'active'"; 
+                            $stmt = $this->con->prepare($sql1); 
+                            $stmt->bind_param('iii', $_SESSION["BusinessId"], $key1, $user_id);
+                            $stmt->execute();
+                
+                            ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                            if ($result->num_rows > 0) {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 1;
+                            } else {
+                                $response["data"][$key]["areas"][$key1]["access_granted"] = 0;
+                                unset($response["data"][$key]["areas"][$key1]);
+                            }
+
+                        }
+                        if (empty($response["data"][$key]["areas"])) {
+                            unset($response["data"][$key]);
+                        }
+                    }
+                }
+                return $response;
+                $stmt->close();
+            }
+        }
+        
+        /**
+         * Get all the area for which the user is not allowed to enter.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_user_area_no_permission($user_id, $business_id) {
+            $sql = 'WITH RECURSIVE tree_view AS (
+                    SELECT 
+    			    `business_areas`.`id` as "id",
+                    `business_areas`.name,
+                    `business_areas`.whitelist_enabled,
+                    `business_areas`.`business_id`,
+    				`business_areas`.`business_building_id`,
+    				`business_areas`.`parent_id`,
+                    0 as level 
+                    FROM `business_areas` 
+       				WHERE `business_areas`.`business_id` = ?
+    				AND `business_areas`.`parent_id` = 0
+    
+                    UNION ALL
+    
+                    SELECT 
+                    `business_areas`.`id`,
+                    `business_areas`.name,
+                    `business_areas`.whitelist_enabled,
+                    `business_areas`.`business_id`,
+    				`business_areas`.`business_building_id`,
+    				`business_areas`.`parent_id`,
+                    level + 1 AS level 
+                    FROM `business_areas` 
+                    JOIN tree_view tv 
+                    ON `business_areas`.`parent_id` = tv.id
+                    )
+
+                    SELECT
+                       `business_building_id`, `business_building`.`building_name`, 
+                       tree_view.`id`, `whitelist_enabled`, tree_view.`business_id`, 
+                       `name`, `level`, tree_view.`parent_id` 
+                    FROM tree_view INNER JOIN `business_building` ON `business_building`.`id` = tree_view.`business_building_id`
+                    ORDER BY tree_view.level DESC;';
+            if ($stmt = $this->con->prepare($sql)) {
+                $stmt->bind_param('i', $business_id);
+                $stmt->execute();
+                ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
+                if ($result->num_rows > 0) {
+                    while($data = $result->fetch_assoc())
+                    { 
+                        $response["return"] = 0;
+                        $response["data"][$data["business_building_id"]]["building_name"] = $data["building_name"];
+                        $response["data"][$data["business_building_id"]]["areas"][$data["id"]]["area_name"] = $data["name"];
+                        $response["data"][$data["business_building_id"]]["areas"][$data["id"]]["parent_id"] = $data["parent_id"];
+                        $response["data"][$data["business_building_id"]]["areas"][$data["id"]]["level"] = $data["level"];
+
+                        $permission = $this->get_user_specific_area_permission($user_id, $data["id"]);
+                        if ($permission["return"] == 0) {
+                            unset($response["data"][$data["business_building_id"]]["areas"][$data["id"]]);
+                        }
+                    }
+                } else {
+                    $response["return"] = 6;
+                    return $response;
+                }
+
+                return $response;
+                $stmt->close();
+            }
+        }
+        /**
+         * Get the badge info from Badge Pseudo Code.
+         *
+         * @return array check "return" key. If 0 everything is ok, else error code.
+         */
+        public function get_badge_info($badge_code, $business_id) {
+            if ($stmt = $this->con->prepare("SELECT * FROM `business_badge` WHERE `badge_code` = ? AND `business_id` = ?")) {
+                $stmt->bind_param('si', $badge_code, $business_id);
+                $stmt->execute();
+
+                $result = $stmt->get_result();
+                if($result->num_rows == 0) {
+                    $response["return"] = 1; 
+                    return $response;
+                }
+                else {
+                    $row = $result->fetch_assoc();
+                    $response["return"] = 0;
+                    array_push($response, $row);
+                    return $response;
+                }
+            }
+        }
+        
     }
 
     ?>

@@ -30,7 +30,7 @@ if (is_numeric($my_role) === FALSE) {
 
 } else {
 	http_response_code(400);
-	$response["response"] = $information;
+	$response["response"] = 0;
 	if ($_POST["info_id"] != 13) {
 		exit (json_encode($response));
 	}
@@ -107,18 +107,6 @@ if ($_POST["info_id"] == 3) {
 	$id;
 	global $my_id;
 	global $my_role;
-	if ($_POST["id"] == 0) { // You are requesting information about yourself
-		$id = $_SESSION["id"];
-	} else {
-		$id = $_POST["id"];
-		if(!check_permission_role($my_id, $_SESSION["BusinessId"], "CO", $my_role)) {
-			http_response_code(400);
-			$return["response"] = 31;
-			exit(json_encode($return));
-		}
-	}
-	$return = $database->get_user_information($id);
-
 	$allowed_fields = [
 		//"birthdate",
 		"name",
@@ -135,6 +123,19 @@ if ($_POST["info_id"] == 3) {
 		"telephone_prefix",
 		"zip"
 	];
+	
+	if ($_POST["id"] == 0) { // You are requesting information about yourself
+		$id = $_SESSION["id"];
+		array_push($allowed_fields, "username", "email");
+	} else {
+		$id = $_POST["id"];
+		if(!check_permission_role($my_id, $_SESSION["BusinessId"], "CO", $my_role)) {
+			http_response_code(400);
+			$return["response"] = 31;
+			exit(json_encode($return));
+		}
+	}
+	$return = $database->get_user_information($id);
 
 	if ($return["return"] == 0) {
 		http_response_code(200);
@@ -322,6 +323,39 @@ if ($_POST["info_id"] == 13) {
 			$_SESSION['BusinessId']	= $response["data"]["last_businessID"];
 			$_SESSION['role'] 		= $database->get_role_in_business($my_id, $_SESSION["BusinessId"]);
 		}
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// Get for which areas the user has permission
+if ($_POST["info_id"] == 14) {
+	$my_id = $_POST["id"];
+	$return = $database->get_user_area_permission($my_id);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = $return;
+		exit (json_encode($response));
+	} else {
+		http_response_code(401);
+		$response = ["response" => $return["return"]];
+		exit (json_encode($response));
+	}
+}
+
+// Get for which areas the user does not have permission
+if ($_POST["info_id"] == 15) {
+	$user_id = $_POST["id"];
+	global $my_businessid;
+	$return = $database->get_user_area_no_permission($user_id, $my_businessid);
+
+	if ($return["return"] == 0) {
+		http_response_code(200);
+		$response = $return;
 		exit (json_encode($response));
 	} else {
 		http_response_code(401);

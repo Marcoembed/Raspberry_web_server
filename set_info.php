@@ -11,6 +11,15 @@ if(!isset($_SESSION['loggedin'])){
 	exit (json_encode($response));
 }
 
+$my_id;
+$my_businessid;
+if ($_SESSION["playrole"] == 1) {
+	$my_id = $_SESSION["playrole_id"];
+} else {
+	$my_id = $_SESSION["id"];
+}
+$my_businessid = $_SESSION["BusinessId"];
+
 $database = new DatabaseManager();
 if ($database->init() == 2) {
 	$response = ["code" => '2']; // Set the response to "Failed to connect to the Mysql Server"
@@ -142,6 +151,104 @@ if ($_POST["set_function"] == 5) {
 	if ($return["response"] == 0) {
 		http_response_code(200);
 		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
+/**
+ * Remove user area permission
+ */
+if ($_POST["set_function"] == 6) {
+	global $my_id;
+	$user_id = $_POST["id"];
+	$area_id = $_POST["area_id"];
+	$return["response"] = $database->remove_user_area_permission($user_id, $area_id, $my_id);
+
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
+/**
+ * Add User Area Permission
+ */
+if ($_POST["set_function"] == 7) {
+	global $my_id;
+	global $my_businessid;
+	$user_id = $_POST["id"];
+	$area_id = $_POST["area_id"];
+	$return["response"] = $database->add_user_area_permission($user_id, $area_id, $my_id, $my_businessid);
+
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit();
+	}
+
+	http_response_code(400);
+	exit (json_encode($return));	
+}
+
+/**
+ * Manage Visitors 
+ */
+if ($_POST["set_function"] == 8) {
+	$expected_parameters = [
+		"CF" 			=> "#visitor_CF",
+		"username" 		=> "#visitor_username",
+		"badge" 		=> "#visitor_badge",
+		"expiration" 	=> "#visitor_expiration"
+	];
+	
+	$parameters = [
+		"CF" 			=> "",
+		"username" 		=> "",
+		"badge" 		=> "",
+		"expiration" 	=> ""
+	];
+	global $my_id;
+	global $my_businessid;
+
+	foreach ($expected_parameters as $key => $value) {
+		$parameters[$key] = $_POST["inputs"][$value];
+	}
+
+	// Check CF or Username
+	if ($parameters["CF"] != "") {
+		// Check CF
+		if ($database->check_userinfo_registration("CF", $parameters["CF"])) {
+			// CF Not Found!
+			$return["response"] = "CF Not Found";
+			http_response_code(200);
+			exit (json_encode($return));	
+		}
+	} else {
+		// Check Username
+		if ($database->check_userinfo_registration("username", $parameters["username"])) {
+			// Username Not Found!
+			$return["response"] = "Username Not Found";
+			http_response_code(200);
+			exit (json_encode($return));	
+		}
+	}
+
+	// Check if the Badge Exist
+	if ($database->get_badge_info($parameters["badge"], $my_businessid)["return"]) {
+		// Badge Not Found!
+		$return["response"] = "Badge Not Found";
+		http_response_code(200);
+		exit (json_encode($return));	
+	}
+
+	$return["response"] = 0;
+	if ($return["response"] == 0) {
+		http_response_code(200);
+		exit(json_encode($return));
 	}
 
 	http_response_code(400);

@@ -80,22 +80,6 @@
                 <label for="inputName">Email</label>
                 <input type="text" id="profile_email" class="form-control">
               </div>
-              <div class="form-group">
-                <label for="inputStatus">Role</label>
-                <select id="inputStatus" class="form-control custom-select">
-                  <option disabled="">SA</option>
-                  <option id="CA_option" disabled="">CA</option>
-                  <option id="CO_option">CO</option>
-                  <option id="USR_option">USR</option>
-                  <!-- <option selected="">USR</option> -->
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="user_main_building">Main Building</label>
-                <select id="user_main_building" class="form-control">
-                  <!-- <option selected="">USR</option> -->
-                </select>
-              </div>
             </div>
             <!-- /.card-body -->
           </div>
@@ -211,12 +195,11 @@
 					</button>
 				</div>
 				<div class="modal-body" id="show_changes">
-					<p id="noEdit">No Edit Found</p>
+					<p id="noEdit" style="display: none;">No Edit Found</p>
 					<p id="name_change_notification">Name will be modified from <b id="oldName"></b> to <b id="newName"></b></p>
 					<p id="surname_change_notification">Surname will be modified from <b id="oldSurname"></b> to <b id="newSurname"></b></p>
 					<p id="username_change_notification">Username will be modified from <b id="oldUsername"></b> to <b id="newUsername"></b></p>
-					<p id="email_change_notification">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
-          <p id="role_change_notification">Role will be modified from <b id="oldRole"></b> to <b id="newRole"></b></p>
+					<p id="email_change_notification" style="display: none;">Email will be modified from <b id="oldEmail"></b> to <b id="newEmail"></b></p>
 				</div>
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -229,18 +212,8 @@
 	</div>
   <!-- /.content-wrapper -->
 
-  <footer class="main-footer">
-    <div class="float-right d-none d-sm-block">
-      <b>Version</b> 3.2.0
-    </div>
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
-  </footer>
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
+  <div id="footer_container">
+  </div>
 </div>
 <!-- ./wrapper -->
 
@@ -258,71 +231,75 @@
   $(document).ready(function(){
     $("#sidebar_container").load("sidebar_CA.html");
     $("#navbar_container").load("navbar_CA.html");
-
-		$("#noEdit").hide();
-		$("#email_change_notification").hide();
+    $("#footer_container").load("footer.html");
 
     //Datemask dd/mm/yyyy
     $('#profile_birthday').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
 
-    $.urlParam = function(name){
-      var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-      if (results==null){
-        return null;
-      }
-      else{
-        return results[1] || 0;
-      }
-    }
-
     var userInformation = new Array();
-
-    var id_to_modify;
-    if($.urlParam('id') != null) {
-      id_to_modify = $.urlParam('id');
-    } else {
-      id_to_modify = 0;
+    const expected_param = [
+      "name",
+      "surname",
+      "username",
+      "email",
+		  "birthdate",
+		  "business_email",
+		  "city",
+		  "country",
+		  "sex",
+		  "street",
+      "number",
+		  "telephone",
+		  "telephone_prefix",
+		  "zip"
+    ];
+    const text_field = {
+      "profile_name"      : "name",
+      "profile_surname"   : "surname",
+      "profile_username"  : "username",
+      "profile_email"     : "email",
+		  "profile_birthday"  : "birthdate",
+		  "profile_business_email" : "business_email",
+		  "profile_city"      : "city",
+		  "profile_country"   : "country",
+		  "profile_street"    : "street",
+		  "profile_street_number" : "number",
+		  "profile_business_cellphone" : "telephone",
+		  "profile_cellphone_prefix" : "telephone_prefix",
+		  "profile_zip"       : "zip"
+    };
+    const select_input = {
+      "sex" : "#profile_sex option:selected" 
+    }
+    const sex_to_element_id = {
+      "Male"    : "#male_option",
+      "Female"  : "#female_option",
+      "Others"  : "#others_option",
     }
 
     $.post("get_info.php", 
     { 
       info_id: "3",
-      id: id_to_modify
+      id: 0
     },
     
     function(data, status, xhr) {
       obj = JSON.parse(data);
       if (xhr.status == 200) {
         if (obj.data) {
-          userInformation["name"] = obj.data.name;
-          $("#profile_name").val(obj.data.name);
-          userInformation["surname"] = obj.data.surname;
-          $("#profile_surname").val(obj.data.surname);
-          userInformation["username"] = obj.data.username;
-          $("#profile_username").val(obj.data.username);
-          userInformation["email"] = obj.data.email;
-          $("#profile_email").val(obj.data.email);
-          userInformation["role"] = obj.data.role;
-          if (obj.data.role == "USR") {
-            $('#USR_option').attr('selected', '');
-          } else if (obj.data.role == "CO") {
-            $('#CO_option').attr('selected', '');
-          } else if (obj.data.role == "CA") {
-            //$('#CA_option').removeAttr("disabled");
-            $('#CA_option').attr('selected', '');
-          } else alert("This should not happen");
+          expected_param.forEach((value) => {
+            if(obj.data[value] == null) {
+              alert("An error occurred. Field "+value+" is missing.");
+            } else {
+              userInformation[value] = obj.data[value];
+              $.each(text_field, function (key1, value1) {
+                $("#"+key1).val(obj.data[value1]);
+              });
+            }
+          });
+          
+          $(sex_to_element_id[obj.data["sex"]]).attr('selected', '');
         }
-      } else if (obj.response == 5) {
-        alert("You are not loggedin.");
-        window.location.href = 'login.html';
-      } else if (obj.response == 7) {
-        alert("Error while intersecating information into the DB");
-      } else if (obj.response == 31) {
-        alert("You do not have the permission to see this page with the current settings (ERR-31)");
-      } else if (obj.response == 32) {
-        alert("You do not have the permission to see this page with the current settings (ERR-32)");
-      } else if (obj.response == 33) {
-        alert("Database Error (ERR-33)");
       } else {
         alert("Error 1");
       }
@@ -379,20 +356,6 @@
 						$("#email_change_notification").hide();
 					}
 
-           var newRole = $("#inputStatus option:selected").text();
-           if (userInformation["role"] != newRole) {
-						if (changed == 0) {
-							$("#noEdit").hide();
-							$("#save_changes_confirm").removeAttr('disabled');
-							changed = 1;
-						}
-						$("#role_change_notification").show();
-						$("#oldRole").text(userInformation["role"]);
-						$("#newRole").text(newRole);
-					} else {
-						$("#role_change_notification").hide();
-					}
-					
 					if (changed == 0) {
 						$("#noEdit").show();
 						$("#save_changes_confirm").attr('disabled', '');
