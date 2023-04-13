@@ -540,30 +540,6 @@
       return childs;
     }
     
-    // function findChildAreas(area_id, building_id) {
-    //   var child_areas = new Array();
-    //   var id_to_check = area_id;
-    //   while (true) {
-    //     var found = 0;
-    //     Object.keys(areaInformation["data"][building_id]["areas"]).forEach(index => {
-    //       var parent_id = areaInformation["data"][building_id]["areas"][index].parent_id;
-    //       if (parent_id == id_to_check) {
-    //         child_areas.push(index);
-    //         found = 1;
-    //         id_to_check = index;
-    //       }
-    //       // if (child_areas.includes(parent_id)) {
-    //       //   child_areas.push(index);
-    //       //   found = 1;
-    //       // }
-    //     });
-    //     if (!found)
-    //       break;
-    //   }
-      
-    //   return child_areas;
-    // }
-    
     var remove_area_id = null;
     $(document).on('click', "[purpose='remove_permission']", function(){
       var area_id = $(this).parent().closest('li').attr("area_id");
