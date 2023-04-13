@@ -15,21 +15,21 @@
         /**
          * Add the user information.
          * 
-         * This function is called when the registration form compiled by the client is sent 
+         * This function is called when the registration form is compiled by the client is sent 
          * @param text $table Description: table where to insert values
-         * @param text $userarray Description: array of userinfo passed by the client
+         * @param text $infoarray Description: array of info passed by the client
          * @return 
          */
-        public function add_userinfo($table, $userarray){
-            $values = implode(", ", $userarray);
-            $n_elements = count($userarray);
+        public function add_info($table, $infoarray){
+            $values = implode(", ", $infoarray);
+            $n_elements = count($infoarray);
             $params = array();
             $qmarks_array = array();
             for($i=0; $i<$n_elements; $i++){
                 array_push($qmarks_array, "?");
             }
             $qmarks_string = implode(", ", $qmarks_array);
-            foreach ($userarray as $name) {
+            foreach ($infoarray as $name) {
                 if (isset($_POST[$name]) && $_POST[$name] != '') {
                     $params[$name] = $_POST[$name];
                 }
@@ -309,6 +309,34 @@
             }
         }
         
+        /**
+         * Check if the registration info are already present in the database
+         * 
+         * Description
+         * 
+         * @param int $businessinfo Description.
+         * @return int 1 if OK, otherwise 0
+         */
+        public function check_businessinfo_registration($businessinfo, $businessvalue){
+            if ($stmt = $this->con->prepare('select * from business_info where `'.$businessinfo.'` = ?')) {
+                // bind parameters (s = string, i = int, b = blob, etc), in our case the username is a string so we use "s"
+                $stmt->bind_param('s', $businessvalue);
+                $stmt->execute();
+                
+                $stmt->store_result();
+                if($stmt->num_rows === 0) {
+                    // userinfo used for the first time
+                    return 1;
+                }
+                else {
+                    // user already registered in the database
+                    return 0;
+                }
+                return 0;
+                $stmt->close();
+            }
+        }
+
         /**
          * Get the number of people in a building or in a area.
          *
