@@ -41,11 +41,9 @@
                 $params = array_merge(array(str_repeat('s', count($params))), array_values($params));
                 call_user_func_array(array(&$stmt, 'bind_param'), $params);
                 $stmt->execute();
-                echo 'You have successfully registered! You can now login!';
                 return 1;
             } else {
                 // Something is wrong with the SQL statement, so you must check to make sure your accounts table exists with all 3 fields.
-                echo 'Could not prepare statement!';
                 return 0;
             }
         }

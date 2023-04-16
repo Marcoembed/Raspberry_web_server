@@ -173,18 +173,20 @@ function hideallErrors() {
   $(document).ready(function(){
     $("#exampleinputemail1-error").hide();
     $("#register_button").click(function(){
+      var owner_name = $("#owner_name").val();
+      var owner_surname = $("#owner_surname").val();
       var name = $("#name").val();
-      var surname = $("#surname").val();
-      var username = $("#username").val();
       var email = $("#email").val();
-      var password = $("#password").val();
-      var password2 = $("#retype_password").val();
-      var codice_fiscale = $("#codice_fiscale").val();
       var phone_number = $("#phone_number").val();
+      var VAT = $("#VAT").val();
+      var city = $("#city").val();
+      var state = $("#state").val();
+      var zip = $("#zip").val();
+      var type_of_business = $("#type_of_business").val();
       var address = $("#address").val();
       
       // checking for blank fields.
-      if( name =='' || surname =='' || username == '' || email =='' || password =='' || password2 =='' || codice_fiscale ==''){
+      if( owner_name =='' || owner_surname =='' || name == '' || email =='' || VAT =='' || phone_number =='' || city =='' || state =='' || zip =='' || type_of_business == '' || address ==''){
           hideallErrors();
           $("#empty_region_error").show();
       //} else if (password != password2) {
@@ -192,15 +194,17 @@ function hideallErrors() {
       } else {
         $.post("register.php",
         { 
-          name:       name,
-          surname:    surname,
-          username:   username,  
-          email:      email, 
-          password:   password,
-          password2:  password2,
-          codice_fiscale: codice_fiscale,
-          phone_number: phone_number,
-          address: address,
+          owner_name:       owner_name,
+          owner_surname:    owner_surname,
+          name:             name,
+          email:            email, 
+          VAT:              VAT,
+          phone_number:     phone_number,
+          city:             city,
+          state:            state,
+          zip:              zip,
+          type_of_business: type_of_business,
+          address:          address,
           info_id: 1,
         },
         
