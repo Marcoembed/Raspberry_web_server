@@ -433,6 +433,10 @@
 <!-- adminlte app -->
 <script src="../../dist/js/adminlte.min.js"></script>
 <!-- register script -->
+
+<!-- Error function Handling -->
+<script src="dist/js/error.js"></script>
+
 <script>
   function hideallErrors() {
     $("#empty_region_error").hide();
@@ -532,6 +536,22 @@
       }
     });
   });
+
+  $.post("get_info.php", 
+    { 
+        info_id: "7"
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+          if (obj.response == 8) {
+          } else responseByID(obj.response);
+      } else {
+          alert("Error 2");
+      }
+    });
+
 </script>
 </body>
 </html>

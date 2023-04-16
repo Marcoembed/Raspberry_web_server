@@ -13,7 +13,6 @@ function responseByID(id) {
       window.location.href = 'index.html';
     } else if (id == 5) {
         if (alertShowed == 0) {
-            alert("You are not loggedin.");
             window.location.href = 'login.html';
             alertShowed = 1;
         }

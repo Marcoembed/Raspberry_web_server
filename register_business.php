@@ -30,11 +30,10 @@ session_start();
 
 /*========== CODE ========== */
 
-// Check user login or not
-//if(!isset($_SESSION['loggedin'])){
-//	$response = ["status" => '200', "response" => 'reg0'];
-//	exit (json_encode($response));
-//}
+if(!isset($_SESSION['loggedin'])){
+	$response = ["status" => '200', "response" => 'reg0'];
+	exit (json_encode($response));
+}
 
 // Try and connect using the info above.
 $con = mysqli_connect($DATABASE_HOST, $DATABASE_USER, $DATABASE_PASS, $DATABASE_NAME);
