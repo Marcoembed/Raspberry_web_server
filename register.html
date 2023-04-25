@@ -1,37 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Registration Page</title>
+  <title>Registration Form | registration Page</title>
 
-  <!-- Google Font: Source Sans Pro -->
+  <!-- google font: source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
+  <!-- font awesome -->
   <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">
   <!-- icheck bootstrap -->
   <link rel="stylesheet" href="../../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-  <!-- Theme style -->
+  <!-- theme style -->
   <link rel="stylesheet" href="../../dist/css/adminlte.min.css">
 </head>
 <body class="hold-transition register-page">
 <div class="register-box">
   <div class="register-logo">
-    <a><b>Admin</b>LTE</a>
+    <a><b>admin</b>lte</a>
   </div>
 
   <div class="card">
     <div class="card-body register-card-body">
       <p class="login-box-msg">Register a new membership</p>
+        <span id="empty_region_error" class="error invalid-feedback">Please enter all fields</span>
 
       <form method="post" id="registerForm">
         <div class="input-group mb-3">
-          <input type="text" class="form-control" id="name" placeholder="Name">
+          <input type="text" class="form-control" id="name" name="name" placeholder="Name">
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-user"></span>
             </div>
           </div>
+            <span id="name_validation_error" class="error invalid-feedback"> Please enter a valid name, special character are not allowed</span>
         </div>
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="surname" placeholder="Surname">
@@ -40,6 +42,7 @@
               <span class="fas fa-user"></span>
             </div>
           </div>
+            <span id="surname_validation_error" class="error invalid-feedback">Please enter a valid surname, special character are not allowed</span>
         </div>
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="username" placeholder="Username">
@@ -48,6 +51,7 @@
               <span class="fas fa-user"></span>
             </div>
           </div>
+            <span id="username_validation_error" class="error invalid-feedback">Please enter a valid username</span>
         </div>
         <div class="input-group mb-3">
           <input type="email" class="form-control" id="email" placeholder="Email">
@@ -56,6 +60,7 @@
               <span class="fas fa-envelope"></span>
             </div>
           </div>
+            <span id="email_validation_error" class="error invalid-feedback">Please enter a valid email</span>
         </div>
         <div class="input-group mb-3">
           <input type="password" class="form-control" id="password" placeholder="Password">
@@ -64,6 +69,7 @@
               <span class="fas fa-lock"></span>
             </div>
           </div>
+            <span id="password_validation_error" class="error invalid-feedback">Please enter a valid password</span>
         </div>
         <div class="input-group mb-3">
           <input type="password" class="form-control" id="retype_password" placeholder="Retype password">
@@ -72,6 +78,7 @@
               <span class="fas fa-lock"></span>
             </div>
           </div>
+            <span id="passwords_error" class="error invalid-feedback">passwords don't match</span>
         </div>
         <div class="input-group mb-3">
           <input type="tel" class="form-control" id="phone_number" placeholder="Phone number">
@@ -80,6 +87,7 @@
               <span class="fas fa-regular fa-phone"></span>
             </div>
           </div>
+            <span id="phone_number_validation_error" class="error invalid-feedback">Please enter a valid phone number</span>
         </div>
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="codice_fiscale" placeholder="Codice fiscale">
@@ -88,6 +96,7 @@
               <span class="fas fa-regular fa-address-card"></span>
             </div>
           </div>
+            <span id="codice_fiscale_validation_error" class="error invalid-feedback">Please enter a valid codice fiscale</span>
         </div>
         <div class="input-group mb-3">
           <input type="text" class="form-control" id="address" placeholder="Address">
@@ -102,7 +111,7 @@
             <div class="icheck-primary">
               <input type="checkbox" id="agreeTerms" name="terms" value="agree" disabled>
               <label for="agreeTerms">
-               I agree to the <a href="#">terms</a>
+               i agree to the <a href="#">terms</a>
               </label>
             </div>
           </div>
@@ -115,14 +124,14 @@
       </form>
 
       <div class="social-auth-links text-center">
-        <p>- OR -</p>
+        <p>- or -</p>
         <a href="#" class="btn btn-block btn-primary">
           <i class="fab fa-facebook mr-2"></i>
-          Sign up using Facebook
+          sign up using Facebook
         </a>
         <a href="#" class="btn btn-block btn-danger">
           <i class="fab fa-google-plus mr-2"></i>
-          Sign up using Google+
+          sign up using Google+
         </a>
       </div>
 
@@ -133,52 +142,109 @@
 </div>
 <!-- /.register-box -->
 
-<!-- jQuery -->
+<!-- jquery -->
 <script src="../../plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap 4 -->
+<!-- bootstrap 4 -->
 <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- AdminLTE App -->
+<!-- jquery-validation -->
+<script src="../../plugins/jquery-validation/jquery.validate.min.js"></script>
+<script src="../../plugins/jquery-validation/additional-methods.min.js"></script>
+<!-- adminlte app -->
 <script src="../../dist/js/adminlte.min.js"></script>
-<!-- Register Script -->
+<!-- register script -->
 <script>
+function hideallErrors() {
+  $("#empty_region_error").hide();
+  $("#existing_email_error").hide();
+  $("#existing_username_error").hide();
+  $("#existing_codice_fiscale_error").hide();
+  $("#existing_phone_number_error").hide();
+  $("#name_validation_error").hide();
+  $("#surname_validation_error").hide();
+  $("#username_validation_error").hide();
+  $("#password_validation_error").hide();
+  $("#email_validation_error").hide();
+  $("#codice_fiscale_validation_error").hide();
+  $("#phone_number_validation_error").hide();
+  $("#address_validation_error").hide();
+  $("#passwords_error").hide();
+}
+
   $(document).ready(function(){
+    $("#exampleinputemail1-error").hide();
     $("#register_button").click(function(){
+      var owner_name = $("#owner_name").val();
+      var owner_surname = $("#owner_surname").val();
       var name = $("#name").val();
-      var surname = $("#surname").val();
-      var username = $("#username").val();
       var email = $("#email").val();
-      var password = $("#password").val();
-      var password2 = $("#retype_password").val();
-      var codice_fiscale = $("#codice_fiscale").val();
       var phone_number = $("#phone_number").val();
+      var VAT = $("#VAT").val();
+      var city = $("#city").val();
+      var state = $("#state").val();
+      var zip = $("#zip").val();
+      var type_of_business = $("#type_of_business").val();
       var address = $("#address").val();
       
-      // Checking for blank fields.
-      if( name =='' || surname =='' || username == '' || email =='' || password =='' || password2 =='' || codice_fiscale ==''){
-        alert("Please fill all fields...!!!!!!");
-      } else if (password != password2) {
-        alert("The two password does not match")
+      // checking for blank fields.
+      if( owner_name =='' || owner_surname =='' || name == '' || email =='' || VAT =='' || phone_number =='' || city =='' || state =='' || zip =='' || type_of_business == '' || address ==''){
+          hideallErrors();
+          $("#empty_region_error").show();
+      //} else if (password != password2) {
+      //  alert("the two password does not match")
       } else {
         $.post("register.php",
         { 
-          name:       name,
-          surname:    surname,
-          username:   username,  
-          email:      email, 
-          password:   password,
-          password2:  password2,
-          codice_fiscale: codice_fiscale,
-          phone_number: phone_number,
-          address: address,
+          owner_name:       owner_name,
+          owner_surname:    owner_surname,
+          name:             name,
+          email:            email, 
+          VAT:              VAT,
+          phone_number:     phone_number,
+          city:             city,
+          state:            state,
+          zip:              zip,
+          type_of_business: type_of_business,
+          address:          address,
+          info_id: 1,
         },
         
         function(data) {
-          if(data == '') {
-            alert("");
-          } else if(data == '') {
-            alert("");
+          hideallErrors();
+          obj = JSON.parse(data);
+          if (obj.status == 200){
+            switch(obj.response){
+              case  "reg0": $("#empty_region_error").show();
+                            break;
+              case  "reg2":$("#existing_email_error").show();
+                            break;
+              case  "reg3":$("#existing_username_error").show();
+                            break;
+              case  "reg4":$("#existing_codice_fiscale_error").show();
+                            break;
+              case  "reg5":$("#existing_phone_number_error").show();
+                            break;
+              case  "reg7":$("#name_validation_error").show();
+                            break;
+              case  "reg8":$("#surname_validation_error").show();
+                            break;
+              case  "reg9":$("#username_validation_error").show();
+                            break;
+              case "reg10":$("#password_validation_error").show();
+                            break;
+              case "reg11":$("#email_validation_error").show();
+                            break;
+              case "reg12":$("#codice_fiscale_validation_error").show();
+                            break;
+              case "reg13":$("#phone_number_validation_error").show();
+                            break;
+              case "reg14":$("#address_validation_error").show();
+                            break;
+              case "reg15":$("#passwords_error").show();
+                            break;
+            }
+
           } else {
-            alert(data);
+            alert(obj);
           }
         });
       }
