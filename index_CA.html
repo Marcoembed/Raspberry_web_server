@@ -377,9 +377,11 @@
         });
     }
 
+    const NumberOfRequestBeforeReady = 4;
+    var NumberOfRequest = 0; 
+    
     // -- General Purpose functions
     $(document).ready(function() {
-        
         // -- This function gets the Business Name -- //
         $.post("get_info.php", 
         { 
@@ -390,7 +392,8 @@
             obj = JSON.parse(data);
             if (xhr.status == 200) {
                 if (obj.business_name) {
-                    $("#business_name").text("["+obj.business_name+"] Dashboard - Customer Administrator")
+                    $("#business_name").text("["+obj.business_name+"] Dashboard - Customer Administrator");
+                    NumberOfRequest++;
                 }
             } else responseByID(obj.response);
         });
@@ -422,6 +425,7 @@
                 if (obj.number_of_visitors !== null) {
                     $("#number_of_visitors").text(obj.number_of_visitors);
                 }
+                NumberOfRequest++;
             } else responseByID(obj.response);
         });
     });
@@ -451,6 +455,7 @@
                         "</tr>");
                     });
                 }
+                NumberOfRequest++;
             } else responseByID(obj.response);     
         });
     });
@@ -551,16 +556,25 @@
             obj = JSON.parse(data);
             if (obj.data) {
               if (obj.data.building) {
-                  $.each( obj.data.building, function( key, value ) {
-                    data = obj.data.building[key];
-                    businessInformation["building"][key] = {building_name: data["building_name"]};
-                    $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
-                    $("#select_building_logs").append('<option number="'+key+'">'+data["building_name"]+'</option>');
-                  });
+                $.each( obj.data.building, function( key, value ) {
+                  data = obj.data.building[key];
+                  businessInformation["building"][key] = {building_name: data["building_name"]};
+                  $("#select_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+                  $("#select_building_logs").append('<option number="'+key+'">'+data["building_name"]+'</option>');
+                });
+                NumberOfRequest++;
               }
             }
           } else responseByID(obj.response);
         });
         
     });
+
+    var intervalId = setInterval(function() {
+        if (NumberOfRequest == NumberOfRequestBeforeReady) {
+            // console.log(NumberOfRequest);
+            $(".preloader").css('height', 0);
+            $(".preloader").children().hide();
+        }
+    }, 200);
 </script>

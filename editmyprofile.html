@@ -232,6 +232,17 @@
     $("#sidebar_container").load("sidebar_CA.html");
     $("#navbar_container").load("navbar_CA.html");
     $("#footer_container").load("footer.html");
+    
+    const NumberOfRequestBeforeReady = 1;
+    var NumberOfRequest = 0; 
+    
+    var intervalId = setInterval(function() {
+        if (NumberOfRequest == NumberOfRequestBeforeReady) {
+            // console.log(NumberOfRequest);
+            $(".preloader").css('height', 0);
+            $(".preloader").children().hide();
+        }
+    }, 200);
 
     //Datemask dd/mm/yyyy
     $('#profile_birthday').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
@@ -300,6 +311,7 @@
           
           $(sex_to_element_id[obj.data["sex"]]).attr('selected', '');
         }
+        NumberOfRequest++;
       } else {
         alert("Error 1");
       }

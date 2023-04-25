@@ -373,6 +373,17 @@
 <script src="dist/js/adminlte.js"></script>
 
 <script>
+  const NumberOfRequestBeforeReady = 1;
+  var NumberOfRequest = 0; 
+    
+  var intervalId = setInterval(function() {
+      if (NumberOfRequest == NumberOfRequestBeforeReady) {
+          // console.log(NumberOfRequest);
+          $(".preloader").css('height', 0);
+          $(".preloader").children().hide();
+      }
+  }, 100);
+  
   $(document).ready(function(){
     $("#sidebar_container").load("sidebar_CA.html");
     $("#navbar_container").load("navbar_CA.html");
@@ -416,6 +427,7 @@
                 $("#select_building_for_new_area").append('<option number="'+key+'">'+data["building_name"]+'</option>');
               });
           }
+          NumberOfRequest++;
         }
       } else responseByID(obj.response);
     });

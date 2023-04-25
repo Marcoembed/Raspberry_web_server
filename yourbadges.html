@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Manage Badges</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
+</head>
+<body class="hold-transition sidebar-mini sidebar-collapse">
+<!-- Site wrapper -->
+<div class="wrapper">
+  
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+  </div>
+  
+  <!-- Navbar -->
+  <div id="navbar_container"></div>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <div id="sidebar_container"></div>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Manage Badges</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+              <li class="breadcrumb-item active">Manage Badges</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="callout callout-info">
+              <h5>Here you can manage your badges!</h5>
+              <p>You can add a new badge, view or remove an exisiting one</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 col-md-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Add New Badge</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                  <label for="visitor_username">Badge Internal Code</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-id-badge"></i></span>
+                    </div>
+                    <input type="text" class="form-control" id="visitor_badge">
+                    <div class="valid-feedback">
+                      Ok
+                    </div>
+                    <div class="invalid-feedback">
+                      Error.
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+					        <button type="button" class="btn btn-success float-right" id="add_badge">
+					        	Add Badge
+					        </button>
+                </div>
+            </div>
+          </div>
+          </div>
+          <div class="col-sm-12 col-md-6">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">View/Remove Badges</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-text-width"></i>
+                    Badge #1
+                  </h3>
+                </div>
+                <div class="card-body">
+                  <dl class="row">
+                    <dt class="col-sm-4">Badge Code</dt>
+                    <dd class="col-sm-8">IEFX-32</dd>
+                    <dt class="col-sm-4">Expiration</dt>
+                    <dd class="col-sm-8">13 January 2000 13:00 AM</dd>
+                    <div class="col-sm-12">
+					            <button type="button" class="btn btn-danger float-right" id="remove_badge" number="1">
+					        	    Remove Badge
+					            </button>
+                    </div>
+                    <!-- <dd class="col-sm-8 offset-sm-4">Donec id elit non mi porta gravida at eget metus.</dd> -->
+                  </dl>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i class="fas fa-text-width"></i>
+                    Badge #2
+                  </h3>
+                </div>
+                <div class="card-body">
+                  <dl class="row">
+                    <dt class="col-sm-4">Badge Code</dt>
+                    <dd class="col-sm-8">Loading..</dd>
+                    <dt class="col-sm-4">Expiration</dt>
+                    <dd class="col-sm-8">Loading..</dd>
+                    <div class="col-sm-12">
+					            <button type="button" class="btn btn-danger float-right" id="remove_badge" number="2">
+					        	    Remove Badge
+					            </button>
+                    </div>
+                    <!-- <dd class="col-sm-8 offset-sm-4">Donec id elit non mi porta gravida at eget metus.</dd> -->
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <div id="footer_container">
+  </div>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="../../plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.min.js"></script>
+<script src="plugins/moment/moment.min.js"></script>
+<script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+
+<!-- Page specific script -->
+<script>
+  $("#sidebar_container").load("sidebar_CA.html");
+  $("#navbar_container").load("navbar_CA.html");
+  $("#footer_container").load("footer.html");
+
+  $(function () {
+    $('#datetimepicker1').datetimepicker();
+  });
+  
+
+  $(document).ready(function(){
+  
+  });
+</script>
+</body>
+</html>

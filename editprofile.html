@@ -191,7 +191,7 @@
         </div>
       </div>
       <div class="row">    
-        <div class="col-12">
+        <div class="col-12 mb-3">
 					<button type="button" class="btn btn-success float-right" id="save_changes" data-toggle="modal" data-target="#modal-xl">
 						  Save Changes
 					</button>
@@ -220,13 +220,13 @@
               <div class="form-group">
                 <label for="add_area_permission_select_main_building">Main Building</label>
                 <select id="add_area_permission_select_main_building" class="form-control">
-                <option selected></option>
+                  <option number="0" selected></option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="add_area_permission_select_area">Select an Area</label>
                 <select id="add_area_permission_select_area" class="form-control">
-                
+                  <option number="0" selected></option>
                 </select>
               </div>
               <div class="form-group">
@@ -328,6 +328,17 @@
 <script src="dist/js/adminlte.js"></script>
 
 <script>
+  const NumberOfRequestBeforeReady = 4;
+  var NumberOfRequest = 0; 
+    
+  var intervalId = setInterval(function() {
+      if (NumberOfRequest == NumberOfRequestBeforeReady) {
+          // console.log(NumberOfRequest);
+          $(".preloader").css('height', 0);
+          $(".preloader").children().hide();
+      }
+  }, 100);
+  
   $(document).ready(function(){
     $("#sidebar_container").load("sidebar_CA.html");
     $("#navbar_container").load("navbar_CA.html");
@@ -419,6 +430,7 @@
             }
               
           });
+          NumberOfRequest++;
         }
       } else responseByID(obj.response);
     });
@@ -438,6 +450,7 @@
           $.each( obj.data, function( key, value ) {
             $("#add_area_permission_select_main_building").append("<option number="+key+">"+value["building_name"]+"</option>")
           });
+          NumberOfRequest++;
         }
       } else responseByID(obj.response);
     });
@@ -609,6 +622,7 @@
                 businessInformation["building"][key] = {building_name: data["building_name"], areas: new Array()};
                 $("#user_main_building").append('<option number="'+key+'">'+data["building_name"]+'</option>');
               });
+              NumberOfRequest++;
           }
         }
       } else responseByID(obj.response);
@@ -697,6 +711,7 @@
           $(role_to_element_id[obj.data["role"]]).attr('selected', '');
           
           $(sex_to_element_id[obj.data["sex"]]).attr('selected', '');
+          NumberOfRequest++;
         }
       } else {
         alert("AAAA"); 
@@ -705,6 +720,7 @@
       }
     });
     
+    // This variable is used to being able to use a for loop to gather all the information to be sended to the server.
     var data = {
       "name" : "",
       "surname" : "",
@@ -721,8 +737,12 @@
 		  "telephone_prefix" : "",
 		  "zip" : ""
     };
+
+    // This function is called when the user clicks on the button "Save Changes"
+    // It is in charge of collecting all the information changed respect to the one saved into the database (loaded when the page is loaded)
     $("#save_changes").click(function(){
       $("#show_changes").empty();
+      var editFound = 0;
       Object.keys(text_field).forEach(key => {
         if (userInformation[text_field[key]] != $("#"+key).val()) {
           $("#show_changes").append('\
@@ -730,6 +750,9 @@
               <p>'+text_field[key]+' will be modified from <b>'+userInformation[text_field[key]]+'</b> to <b>'+$("#"+key).val()+'</b></p> \
             </div>');
           data[text_field[key]] = $("#"+key).val();
+          editFound = 1;
+        } else {
+            data[key] = "";
         }
       });
       
@@ -739,10 +762,23 @@
             <div class="row"> \
               <p>'+key+' will be modified from <b>'+userInformation[key]+'</b> to <b>'+$(select_input[key]).attr("number")+'</b></p> \
             </div>');
-          data[key] = $(select_input[key]).attr("number");
+            data[key] = $(select_input[key]).attr("number");
+            editFound = 1;
+        } else {
+            data[key] = "";
         }
       });
+
+      // If no edit is found, we disable the save changes confirm button to avoid user spamming useless post request
+      if (!editFound)
+        $("#save_changes_confirm").attr("disabled", "");
+      else
+        $("#save_changes_confirm").removeAttr("disabled");
     });
+
+    var KnownErrors = {
+      "Cant_Edit_CA/SA" : "You cannot edit the role of a CA/SA"
+    };
 
 		$("#save_changes_confirm").click(function(){
 			$.post("set_info.php", 
@@ -754,8 +790,8 @@
       
       function(data, status) {
         obj = JSON.parse(data);
-        if (obj.code == 41) {
-          alert("Something went wrong");
+        if (KnownErrors[obj.code] != null) {
+          alert(KnownErrors[obj.code]);
         } else if (obj.code == 42) {
           location.reload();
         } else {

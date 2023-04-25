@@ -99,7 +99,7 @@
                 } else if ($user_business_role == "CA" || $user_business_role == "SA") { 
                     // Something went wrong. You can't modify the role to a person that is SA or CA
                     // .. because this function is intended to be called by a CA.
-                    $response = ["code" => '41'];
+                    $response = ["code" => 'Cant_Edit_CA/SA'];
                 } else {
                     $return_val = $this->set_role_in_business($userid, $_SESSION["BusinessId"], $newvalue);
                     $response = ["code" => $return_val];    
