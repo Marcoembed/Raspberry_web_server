@@ -161,11 +161,11 @@
                 </div>
               </div>
               <div class="form-group">
-                <label for="inputStatus">Sex</label>
-                <select id="inputStatus" class="form-control custom-select">
-                  <option id="male_option">Male</option>
-                  <option id="female_option">Female</option>
-                  <option id="others_option">Others</option>
+                <label for="profile_sex">Sex</label>
+                <select id="profile_sex" class="form-control custom-select">
+                  <option id="male_option" number="Male">Male</option>
+                  <option id="female_option" number="Female">Female</option>
+                  <option id="others_option" number="Others">Others</option>
                 </select>
               </div>
             </div>
@@ -287,6 +287,25 @@
       "Female"  : "#female_option",
       "Others"  : "#others_option",
     }
+    
+    // This variable is used to being able to use a for loop to gather all the information to be sended to the server.
+    var data = {
+      "name" : "",
+      "surname" : "",
+      "username" : "",
+      "email" : "",
+
+		  "birthdate" : "",
+		  "street" : "",
+      "number" : "",
+		  "city" : "",
+		  "country" : "",
+		  "zip" : "",
+		  "business_email" : "",
+		  "telephone" : "",
+		  "telephone_prefix" : "",
+		  "sex" : ""
+    };
 
     $.post("get_info.php", 
     { 
@@ -303,136 +322,81 @@
               alert("An error occurred. Field "+value+" is missing.");
             } else {
               userInformation[value] = obj.data[value];
-              $.each(text_field, function (key1, value1) {
-                $("#"+key1).val(obj.data[value1]);
+              Object.keys(text_field).forEach(key => {
+                $("#"+key).val(obj.data[text_field[key]]);
               });
             }
           });
           
           $(sex_to_element_id[obj.data["sex"]]).attr('selected', '');
+          NumberOfRequest++;
         }
-        NumberOfRequest++;
       } else {
-        alert("Error 1");
+        alert("AAAA"); 
+        responseByID(obj.response); 
       }
     });
       
     $("#save_changes").click(function(){
-			var changed = 0;
-			if (userInformation["name"] != $("#profile_name").val()) {
-				if (changed == 0) {
-					$("#noEdit").hide();
-					$("#save_changes_confirm").removeAttr('disabled');
-					changed = 1;
-				}
-				$("#name_change_notification").show();
-				$("#oldName").text(userInformation["name"]);
-				$("#newName").text($("#profile_name").val());
-			} else {
-				$("#name_change_notification").hide();
-			}
-			if (userInformation["surname"] != $("#profile_surname").val()) {
-				if (changed == 0) {
-					$("#noEdit").hide();
-					$("#save_changes_confirm").removeAttr('disabled');
-					changed = 1;
-				}
-				$("#surname_change_notification").show();
-				$("#oldSurname").text(userInformation["surname"]);
-				$("#newSurname").text($("#profile_surname").val());
-			} else {
-				$("#surname_change_notification").hide();
-			}
-			if (userInformation["username"] != $("#profile_username").val()) {
-				if (changed == 0) {
-							$("#noEdit").hide();
-							$("#save_changes_confirm").removeAttr('disabled');
-							changed = 1;
-						}
-						$("#username_change_notification").show();
-						$("#oldUsername").text(userInformation["username"]);
-						$("#newUsername").text($("#profile_username").val());
-					} else {
-						$("#username_change_notification").hide();
-					}
-					if (userInformation["email"] != $("#profile_email").val()) {
-						if (changed == 0) {
-							$("#noEdit").hide();
-							$("#save_changes_confirm").removeAttr('disabled');
-							changed = 1;
-						}
-						$("#email_change_notification").show();
-						$("#oldEmail").text(userInformation["email"]);
-						$("#newEmail").text($("#profile_email").val());
-					} else {
-						$("#email_change_notification").hide();
-					}
+      $("#show_changes").empty();
+      var editFound = 0;
+      Object.keys(text_field).forEach(key => {
+        if (userInformation[text_field[key]] != $("#"+key).val()) {
+          $("#show_changes").append('\
+            <div class="row"> \
+              <p>'+text_field[key]+' will be modified from <b>'+userInformation[text_field[key]]+'</b> to <b>'+$("#"+key).val()+'</b></p> \
+            </div>');
+          data[text_field[key]] = $("#"+key).val();
+          editFound = 1;
+        } else {
+            data[key] = "";
+        }
+      });
+      
+      Object.keys(select_input).forEach(key => {
+        if (userInformation[key] != $(select_input[key]).attr("number")) {
+          $("#show_changes").append('\
+            <div class="row"> \
+              <p>'+key+' will be modified from <b>'+userInformation[key]+'</b> to <b>'+$(select_input[key]).attr("number")+'</b></p> \
+            </div>');
+            data[key] = $(select_input[key]).attr("number");
+            editFound = 1;
+        } else {
+            data[key] = "";
+        }
+      });
 
-					if (changed == 0) {
-						$("#noEdit").show();
-						$("#save_changes_confirm").attr('disabled', '');
-					}
-       	});
+      // If no edit is found, we disable the save changes confirm button to avoid user spamming useless post request
+      if (!editFound)
+        $("#save_changes_confirm").attr("disabled", "");
+      else
+        $("#save_changes_confirm").removeAttr("disabled");
+    
+    });
 
-				$("#save_changes_confirm").click(function(){
-					var changed = 0;
-					var data = {};
-					if (userInformation["name"] != $("#profile_name").val()) {
-						changed = 1;
-						data["name"] = $("#profile_name").val();
-					} else {
-						delete data["name"];
-					}
-					if (userInformation["surname"] != $("#profile_surname").val()) {
-						changed = 1;
-						data["surname"] = $("#profile_surname").val();
-					} else {
-						delete data["surname"];
-					}
-					if (userInformation["username"] != $("#profile_username").val()) {
-						changed = 1;
-						data["username"] = $("#profile_username").val();
-					} else{
-						delete data["username"];
-					}
-					if (userInformation["email"] != $("#profile_email").val()) {
-						changed = 1;
-						data["email"] = $("#profile_email").val();
-					} else {
-						delete data["email"];
-					}
-           if (userInformation["role"] != $("#inputStatus option:selected").text()) {
-						changed = 1;
-						data["role"] = $("#inputStatus option:selected").text();
-					} else {
-						delete data["role"];
-					}
+    var KnownErrors = {
+      "Cant_Edit_CA/SA" : "You cannot edit the role of a CA/SA"
+    };
 
-					if (changed == 0) {
-						alert("This should not happen");
-					} else {
-             $("#save_changes_confirm").attr('disabled', '');
-						$.post("set_info.php", 
-         		{ 
-           		set_function: "0",
-							id: $.urlParam('id'),
-           		data: JSON.stringify(data) 
-         		},
-         
-         		function(data, status) {
-               obj = JSON.parse(data);
-               // if (obj.status == 200) {
-                 if (obj.code == 41) {
-                   alert("Something went wrong");
-                 } else if (obj.code == 42) {
-                   location.reload();
-                 } else {
-                   alert("Something went wrong (others)");
-                 }
-               // }
-             });
-					}
-       	});
+		$("#save_changes_confirm").click(function(){
+			$.post("set_info.php", 
+      { 
+      	set_function: "0",
+				id: 0,
+      	data: JSON.stringify(data) 
+      },
+      
+      function(data, status) {
+        obj = JSON.parse(data);
+        if (KnownErrors[obj.code] != null) {
+          alert(KnownErrors[obj.code]);
+        } else if (obj.code == 42) {
+          location.reload();
+        } else {
+          alert("Something went wrong (others)");
+        }
+      });
+		});
   });
 </script>
 </body>

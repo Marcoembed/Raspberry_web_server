@@ -56,26 +56,66 @@
          * @param text  $field    Description.
          * @param int   $userid   Description.
          * @param text  $newvalue Description.
+         * @param int   $own_id   0 if the userid is referred to another user.
          * @return array Description.
          */
-        public function update_userinfo($field, $userid, $newvalue) {
+        public function update_userinfo($field, $userid, $newvalue, $own_id) {
             $my_businessid = $_SESSION["BusinessId"];
-            $allowed_field = [
-                "birthdate", 
-                "sex", 
-                "street",
-                "number", 
-                "city", 
-                "zip", 
-                "country", 
-                "business_email", 
-                "telephone_prefix", 
-                "telephone",
-                //"Visitor",
-            ];
+            if ($own_id == 0) {
+                $allowed_field = [
+                    "birthdate", 
+                    "street",
+                    "number", 
+                    "city", 
+                    "zip", 
+                    "country", 
+                    "business_email", 
+                    "telephone_prefix", 
+                    "telephone",
+                    "sex" 
+                    //"Visitor",
+                ];
+                $allowed_role = [
+                    "role"
+                ];
+                $allowed_building = [
+                    "id_business_building"
+                ];
+                $allowed_userinfo = [
+                ];
+            }
+            else
+                $allowed_field = [
+                    "birthdate", 
+                    "street",
+                    "number", 
+                    "city", 
+                    "zip", 
+                    "country", 
+                    "business_email", 
+                    "telephone_prefix", 
+                    "telephone",
+                    "sex" 
+                    //"Visitor",
+                ];
+                $allowed_role = [
+                ];
+                $allowed_building = [
+                ];
+                $allowed_userinfo = [
+                    "name",
+                    "surname",
+                    "username",
+                    "email"
+                ];
             
             if (array_search($field, $allowed_field) !== FALSE ) {
-            
+                // Special Case to convert date to a correct format in SQL
+                if ($field == "birthdate") {
+                    $newvalue = str_replace("/","-", $newvalue);
+                    $newvalue = date('Y-m-d', strtotime($newvalue));
+                }
+
                 if ($stmt = $this->con->prepare('UPDATE userdetails SET '.$field.'=? WHERE user_id=? AND business_id=?')) {
                     $stmt->bind_param('sii', $newvalue, $userid, $my_businessid);
                     $stmt->execute();
@@ -85,10 +125,10 @@
                     else 
                         $response = ["code" => '41']; // Set the response to "Update not OK"		 
 
-                } else {
+                } else
                     $response = ["code" => '43'];
-                }
-            } else if ($field == "role") { // Check for ROLE changes
+
+            } else if (array_search($field, $allowed_role) !== FALSE ) { // Check for ROLE changes
                 $user_business_role = $this->get_role_in_business($userid, $_SESSION["BusinessId"]);
                 if ($user_business_role == '33') { // Something went wrong
                     $response = ["code" => '43'];
@@ -100,7 +140,7 @@
                     $return_val = $this->set_role_in_business($userid, $_SESSION["BusinessId"], $newvalue);
                     $response = ["code" => $return_val];    
                 }
-            } else if ($field == "id_business_building") {
+            } else if (array_search($field, $allowed_building) !== FALSE) {
                 if ($stmt = $this->con->prepare('UPDATE business_people SET '.$field.'=? WHERE UserID=? AND BusinessID=?')) {
                     $stmt->bind_param('sii', $newvalue, $userid, $my_businessid);
                     $stmt->execute();
@@ -109,9 +149,22 @@
                         $response = ["code" => '42']; // Set the response to "Update OK"
                     else 
                         $response = ["code" => '41']; // Set the response to "Update not OK"		 
-                } else {
+                } else 
                     $response = ["code" => '43'];
-                }
+
+            } else if (array_search($field, $allowed_userinfo) !== FALSE) {
+                if ($stmt = $this->con->prepare('UPDATE userinfo SET '.$field.'=? WHERE id=?')) {
+                    $stmt->bind_param('si', $newvalue, $userid);
+                    $stmt->execute();
+                    
+                    if(mysqli_affected_rows($this->con))
+                        $response = ["code" => '42']; // Set the response to "Update OK"
+                    else 
+                        $response = ["code" => '41']; // Set the response to "Update not OK"		 
+
+                } else
+                    $response = ["code" => '43'];          
+            
             } else {
                 $response = ["code" => '44'];
             }
@@ -1160,7 +1213,7 @@
             $response["return"] = 1;
             
             // Prepare our SQL, preparing the SQL statement will prevent SQL injection.
-            if ($stmt = $this->con->prepare('SELECT `id`, `name` FROM business_areas WHERE business_id = ? AND business_building_id = ?')) {
+            if ($stmt = $this->con->prepare('SELECT `id`, `name`, `parent_id` FROM business_areas WHERE business_id = ? AND business_building_id = ?')) {
                 $stmt->bind_param('ii', $businessID, $business_buildingID);
                 $stmt->execute();
                 ($result = $stmt->get_result()) or trigger_error($stmt->error, E_USER_ERROR);
@@ -1168,7 +1221,8 @@
                     while($data = $result->fetch_assoc())
                     { 
                         $response["return"] = 0;
-                        $response["data"][$data["id"]]["name"] = $data["name"];
+                        $response["data"][$data["id"]]["name"]      = $data["name"];
+                        $response["data"][$data["id"]]["parent_id"] = $data["parent_id"];
                     }
                 } else {
                     // Incorrect username

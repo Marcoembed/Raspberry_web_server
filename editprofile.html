@@ -18,6 +18,10 @@
   #building_access_list ul {
     margin-top: 0.3rem;
   }
+  
+  #building_access_list li {
+    border: 0px;
+  }
 </style>
 <body class="hold-transition sidebar-mini layout-fixed">
 <!-- Site wrapper -->
@@ -201,7 +205,7 @@
         <div class="col-md-6 col-sm-12">
           <div class="card card-primary">
             <div class="card-header">
-              <h3 class="card-title">User Area Access Permission</h3>
+              <h3 class="card-title">View/Modify User Area Permission</h3>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                   <i class="fas fa-minus"></i>
@@ -209,14 +213,25 @@
               </div>
             </div>
             <div class="card-body">
-              <p class="login-box-msg">View/Modify User Area Permission</p>
+              <p class="login-box-msg"></p>
               <p id="no_permission_found">This Workers does not have any permission to enter in any area</p>
               <ul class="list-group" id="building_access_list">
               </ul>
-              <div class="social-auth-links text-center mb-3">
-                <p>- OR -</p>
+            </div>
+            <!-- /.card-body -->
+          </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <div class="card card-primary">
+            <div class="card-header">
+              <h3 class="card-title">Add User Area Access Permission</h3>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                  <i class="fas fa-minus"></i>
+                </button>
               </div>
-              <p class="login-box-msg">Add User Area Permission</p>
+            </div>
+            <div class="card-body">
               <div class="form-group">
                 <label for="add_area_permission_select_main_building">Main Building</label>
                 <select id="add_area_permission_select_main_building" class="form-control">
@@ -237,7 +252,6 @@
             </div>
             <!-- /.card-body -->
           </div>
-        </div>
       </div>
     </section>
     <!-- /.content -->
@@ -660,10 +674,16 @@
 		  "profile_zip" : "zip"
     };
 
-    var select_input = {
+    const select_input = {
       "sex" : "#profile_sex option:selected", 
       "role" : "#inputStatus option:selected",
       "id_business_building" : "#user_main_building option:selected"
+    }
+
+    const select_input_to_name = {
+      "sex" : "Sex",
+      "role"  : "Role",
+      "id_business_building": "Main Building"
     }
 
     const role_to_element_id = {
@@ -716,7 +736,6 @@
       } else {
         alert("AAAA"); 
         responseByID(obj.response); 
-        alert("PD");
       }
     });
     
@@ -760,7 +779,7 @@
         if (userInformation[key] != $(select_input[key]).attr("number")) {
           $("#show_changes").append('\
             <div class="row"> \
-              <p>'+key+' will be modified from <b>'+userInformation[key]+'</b> to <b>'+$(select_input[key]).attr("number")+'</b></p> \
+              <p>'+select_input_to_name[key]+' will be modified from <b>'+userInformation[key]+'</b> to <b>'+$(select_input[key]).attr("number")+'</b></p> \
             </div>');
             data[key] = $(select_input[key]).attr("number");
             editFound = 1;

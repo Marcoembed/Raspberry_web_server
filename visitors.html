@@ -13,6 +13,17 @@
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <link rel="stylesheet" href="plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css">
 </head>
+
+<style>
+  #building_access_list ul {
+    margin-top: 0.3rem;
+  }
+  
+  #building_access_list li {
+    border: 0px;
+  }
+</style>
+
 <body class="hold-transition sidebar-mini sidebar-collapse">
 <!-- Site wrapper -->
 <div class="wrapper">
@@ -55,7 +66,7 @@
           <div class="col-12">
             <div class="callout callout-info">
               <h5>Here you can add a visitor!</h5>
-              <p>The visitor should be already registered to the system. You need to know the CF or the Username of the Visitor.</p>
+              <p>You need to know the CF of the Visitor.</p>
               <p>You should also have some already registered badge to be given to the visitor. Otherwise you need to register a new badge first.</p>
             </div>
           </div>
@@ -73,37 +84,16 @@
             </div>
             <div class="card-body">
                 <div class="form-group">
-                  <div class="row">
-                    <div class="col-sm-12 col-md">
-                      <div class="input-group mb-2 mr-sm-2">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text"><i class="fas fa-address-card"></i></span>
-                        </div>
-                        <input type="text" class="form-control" id="visitor_CF" placeholder="CF">
-                        <div class="valid-feedback">
-                          Ok
-                        </div>
-                        <div class="invalid-feedback">
-                          Error.
-                        </div>
-                      </div>
+                  <div class="input-group mb-2 mr-sm-2">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-address-card"></i></span>
                     </div>
-                    <div class="col-sm-12 col-md-2 text-center">
-                      <label class="">- OR -</label>
+                    <input type="text" class="form-control" id="visitor_CF" placeholder="CF">
+                    <div class="valid-feedback">
+                      Ok
                     </div>
-                    <div class="col-sm-12 col-md">
-                      <div class="input-group mb-2 mr-sm-2">
-                        <div class="input-group-prepend">
-                          <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
-                        </div>
-                        <input type="text" class="form-control" id="visitor_username" placeholder="Username">
-                        <div class="valid-feedback">
-                          Ok
-                        </div>
-                        <div class="invalid-feedback">
-                          Error.
-                        </div>
-                      </div>
+                    <div class="invalid-feedback">
+                      Error.
                     </div>
                   </div>
                 </div>
@@ -137,6 +127,12 @@
                       </div>
                   </div>
                 </div>
+                <div class="form-group">
+                <b>Select Visitor Permissions</b>
+                </div>
+                <ul class="list-group" id="building_access_list">
+                
+                </ul>
                 <div class="form-group">
 					        <button type="button" class="btn btn-success float-right" id="add_visitor">
 					        	Add Visitor
@@ -173,54 +169,197 @@
   $("#navbar_container").load("navbar_CA.html");
   $("#footer_container").load("footer.html");
 
+  var NumberOfRequest = 0;
+  const NumberOfRequestBeforeReady = 0;
+
+  var current_date = new Date();
+  current_date.setHours(23);
+  current_date.setMinutes(59);
+  current_date.setSeconds(59);
+
   $(function () {
-    $('#datetimepicker1').datetimepicker();
+    $('#datetimepicker1').datetimepicker({
+      date: current_date
+    });
   });
   
   var inputs = {
     "#visitor_CF"         : "",
-    "#visitor_username"   : "",
     "#visitor_badge"      : "",
     "#visitor_expiration" : ""
   }
+
+  var areas = new Array();
   
   var check_empty = {
+    "#visitor_CF"         : "",
     "#visitor_badge"      : "",
     "#visitor_expiration" : ""
   }
 
   var errors_from_server = {
-    "CF Not Found"        : "#visitor_CF",
-    "Username Not Found"  : "#visitor_username", 
     "Badge Not Found"     : "#visitor_badge" 
   }
   
   var errors_from_server_text = {
-    "CF Not Found"        : "CF Not Found",
-    "Username Not Found"  : "Username Not Found", 
     "Badge Not Found"     : "Badge Not Found" 
+  }
+    
+  // This function is used to retrieve the information related to the business
+  var businessInformation = {
+    name: "",
+    VAT: 0,
+    building : new Array
+  };
+    
+  function findChildAreas(area_id, building_id) {
+    var childs = new Array();
+    var new_childs = new Array();
+    var buffer = new Array();
+    var counter = 0;
+    buffer.push(area_id);
+    while (true & counter < 1000) {
+      Object.keys(buffer).forEach(key_tofind => {
+        var to_find = buffer[key_tofind];
+        
+        Object.keys(businessInformation["building"][building_id]["areas"]).forEach(key => {
+          var value = businessInformation["building"][building_id]["areas"][key]; 
+          
+          if (value.parent_id == to_find) {
+            childs.push(key);
+            new_childs.push(key);
+          }
+        });
+      });
+      if (new_childs.length == 0)
+        break;
+      buffer = new_childs.slice();
+      new_childs.length = 0;
+      counter++;
+    }
+    return childs;
   }
 
   $(document).ready(function(){
-    // This code will disable the username field if the user starts typing on the CF field, or viceversa
-    $("#visitor_CF").on("input", function(){
-        var visitor_CF = $("#visitor_CF").val();
-        var visitor_username = $("#visitor_username").val();
-        if (visitor_CF != "") {
-          $("#visitor_username").attr("disabled", '');
-        } else {
-          $("#visitor_username").removeAttr("disabled");
-        }
-    });
     
-    $("#visitor_username").on("input", function(){
-        var visitor_CF = $("#visitor_CF").val();
-        var visitor_username = $("#visitor_username").val();
-        if (visitor_username != "") {
-          $("#visitor_CF").attr("disabled", '');
-        } else {
-          $("#visitor_CF").removeAttr("disabled");
+
+    $.post("get_info.php", 
+    { 
+      info_id: "8",
+    },
+    
+    function(data, status, xhr) {
+      if (xhr.status == 200) {
+        obj = JSON.parse(data);
+        if (obj.data) {
+          businessInformation["name"] = obj.data.name;
+          businessInformation["VAT"] = obj.data.VAT;
+          if (obj.data.building) {
+            $.each( obj.data.building, function( key, value ) {
+              data = obj.data.building[key];
+              businessInformation["building"][key] = {building_name: data["building_name"], areas: new Array()};
+              
+              building_name = value.building_name;
+              $("#building_access_list").append("<li class='list-group-item' number="+key+" type='building'>"+building_name+"</li>");
+              $("li[number="+key+"][type='building']").append("<ul class='list-group list-group-flush' type='areas' id_building="+key+" number=0></ul>");
+              
+              $.post("get_info.php", 
+              { 
+                info_id: "9",
+                building_id: key
+              },
+    
+              function(data1, status1, xhr1) {
+                if (xhr1.status == 200) {
+                  obj1 = JSON.parse(data1);
+                  if (obj1.data) {
+                    $.each( obj1.data, function( key1, value1 ) {
+                      data1 = obj1.data[key1];
+                      businessInformation["building"][key]["areas"][key1] = {area_name : data1["name"], parent_id : data1["parent_id"], checked: 0};
+                    });
+                    
+                    var areas_array = businessInformation["building"][key]["areas"].slice();
+                    var condition = true;
+                    var counter = 0;
+                    while(condition && counter < 1000) {
+                      condition = false;
+                      Object.keys(areas_array).forEach(key1 => {
+                        value1 = areas_array[key1];
+                        condition = true;
+
+                        areas_id = key1;
+                        area_name = value1.area_name;
+                        parent_id = value1.parent_id;
+                        if (parent_id == 0) {
+                          $("ul[id_building="+key+"][type='areas'][number='0']").append('<li class="list-group-item" area_id='+areas_id+' type="area"> \
+                            <div class="row"> \
+                              <div class="col-8"> \
+                              <div style="margin-right: 2.5em;">'+area_name+'</div> \
+                              </div> \
+                              <div class="col-4 text-right"> \
+                                  <input type="checkbox" value="" area_id='+areas_id+' parent_id='+parent_id+' building_id='+key+'> \
+                              </div> \
+                            </div></li>');
+                            delete(areas_array[key1]);
+                        } else {
+                          if ($("li[type='area'][area_id='"+parent_id+"']").length) {
+                            $("li[type='area'][area_id='"+parent_id+"']").append('\
+                            <ul class="list-group"> \
+                              <li class="list-group-item" area_id='+areas_id+' type="area"> \
+                                <div class="row"> \
+                                  <div class="col-8"> \
+                                    <div style="margin-right: 2.5em;">'+area_name+'</div> \
+                                  </div> \
+                                  <div class="col-4 text-right"> \
+                                    <input type="checkbox" value="" area_id='+areas_id+' parent_id='+parent_id+' building_id='+key+'> \
+     	              		          </div> \
+                                </div> \
+                              </li> \
+                            </ul>');
+                            delete(areas_array[key1]);
+                          } 
+                        }
+                      });
+                      counter++;
+                    }
+                    
+                    // This function handles the parent/child areas
+                    $("input[type=checkbox]").on("change", function() {
+                      var checked = $(this).is(":checked");
+                      var parent_id = $(this).attr("parent_id");
+                      var area_id = $(this).attr("area_id");
+                      var building_id = $(this).attr("building_id");
+                      if (checked) {
+                        var condition = true;
+                        var counter = 0;
+                        while(condition && counter < 1000) {
+                          if (parent_id == 0) {
+                            condition = false;
+                            $('input[area_id='+area_id+']').prop('checked', true);
+                          } else {
+                            $('input[area_id='+parent_id+']').prop('checked', true);
+                            area_id = $('input[area_id='+parent_id+']').attr("area_id");
+                            parent_id = $('input[area_id='+parent_id+']').attr("parent_id");
+                          } 
+                          counter++;
+                        }
+                      } else {
+                        var child_array = findChildAreas(area_id, building_id);
+                        if (child_array.length != 0) {
+                          child_array.forEach(element => {
+                            $('input[area_id='+element+']').prop('checked', false);
+                          });
+                        }
+                      }
+                    });
+                  }
+                } else responseByID(obj.response);
+              });
+            });
+          }
+          NumberOfRequest++;
         }
+      } else responseByID(obj.response);
     });
 
     // This code will be called when the user clicks on the "Add Visitor" button
@@ -241,42 +380,19 @@
         $(key).removeClass("is-invalid");
       });
 
-      // Empty Check specific for this page, check if CF or username is empty
-      var visitor_CF = $("#visitor_CF").val();
-      var visitor_username = $("#visitor_username").val();
-      if (visitor_CF == "") {
-        if(visitor_username == "") {
-          $("#visitor_CF").removeClass("is-valid");
-          $("#visitor_CF").addClass("is-invalid");
-          $("#visitor_CF").siblings(".invalid-feedback").text("Please specify a CF or a Username");
-          $("#visitor_username").removeClass("is-valid");
-          $("#visitor_username").addClass("is-invalid");
-          $("#visitor_username").siblings(".invalid-feedback").text("Please specify a CF or a Username");
-          errorFound = 1;
-        } else {
-          inputs["#visitor_username"] = visitor_username;
-          inputs["#visitor_CF"] = visitor_CF;
-          $("#visitor_CF").removeClass("is-invalid");
-          $("#visitor_username").removeClass("is-invalid");
+      areas.length = 0;
+      $('input[type=checkbox]').each(function(){
+        var checked = $(this).is(":checked");
+        var area_id = $(this).attr("area_id");
+        var parent_id = $(this).attr("parent_id");
+        
+        if (checked) {
+          areas.push(area_id);
         }
-      } else {
-        if (visitor_username != "") {
-          $("#visitor_CF").removeClass("is-valid");
-          $("#visitor_CF").addClass("is-invalid");
-          $("#visitor_CF").siblings(".invalid-feedback").text("Please specify a CF or a Username");
-          $("#visitor_username").removeClass("is-valid");
-          $("#visitor_username").addClass("is-invalid");
-          $("#visitor_username").siblings(".invalid-feedback").text("Please specify a CF or a Username");
-          errorFound = 1;
-        } else {
-          inputs["#visitor_username"] = visitor_username;
-          inputs["#visitor_CF"] = visitor_CF;
-          $("#visitor_CF").removeClass("is-invalid");
-          $("#visitor_username").removeClass("is-invalid");
-        }
-      }
+      });
 
       if (errorFound) {
+        $("html, body").animate({ scrollTop: 0 }, "slow");
         return false;
       } 
 
@@ -285,7 +401,8 @@
       $.post("set_info.php", 
       {
         set_function: "8",
-        inputs
+        inputs,
+        areas: JSON.stringify(areas)
       },
 
       function(data, status, xhr) {

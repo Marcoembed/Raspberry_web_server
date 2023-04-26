@@ -38,21 +38,34 @@ if ($database->init() == 2) {
  */
 if ($_POST["set_function"] == 0) {
 	$response;
-	if (!check_permission_role($_SESSION['id'], $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
-		$response = ["code" => '34']; // Set the response to "No permission for this action"	
-		exit (json_encode($response));
-	}
-
-	$obj = json_decode($_POST['data'], true);
-
+	$user_id;
+	
+	// Wrong POST, missing "id" field
 	if(!isset($_POST["id"])) {
 		$response = ["code" => '41']; // Set the response to "Update not OK"	
 		exit (json_encode($response));	
 	}
 
+	if ($_POST["id"] == 0) {
+		// The user wants to modify the his own information
+		$user_id = $my_id;
+	} else {
+		// The user (CA) wants to modify the information of an user
+		$user_id = $_POST["id"];
+		if (!check_permission_role($my_id, $_SESSION['BusinessId'], "CA", $_SESSION['role'])) {
+			$response = ["code" => '34']; // Set the response to "No permission for this action"	
+			exit (json_encode($response));
+		}
+	}
+
+	$obj = json_decode($_POST['data'], true);
+
 	foreach ($obj as $key => $value) {
 		if ($value != "") {
-			$response = $database->update_userinfo($key, $_POST["id"], $value);
+			if ($_POST["id"] == 0)
+				$response = $database->update_userinfo($key, $user_id, $value, 1);
+			else
+				$response = $database->update_userinfo($key, $user_id, $value, 0);
 			if($response["code"] != 42) {
 				exit (json_encode($response)); // Set the response to "Update not OK"		
 			}
@@ -200,42 +213,38 @@ if ($_POST["set_function"] == 7) {
 if ($_POST["set_function"] == 8) {
 	$expected_parameters = [
 		"CF" 			=> "#visitor_CF",
-		"username" 		=> "#visitor_username",
 		"badge" 		=> "#visitor_badge",
 		"expiration" 	=> "#visitor_expiration"
 	];
 	
 	$parameters = [
 		"CF" 			=> "",
-		"username" 		=> "",
 		"badge" 		=> "",
 		"expiration" 	=> ""
 	];
 	global $my_id;
 	global $my_businessid;
 
+
 	foreach ($expected_parameters as $key => $value) {
 		$parameters[$key] = $_POST["inputs"][$value];
 	}
 
-	// Check CF or Username
-	if ($parameters["CF"] != "") {
-		// Check CF
-		if ($database->check_userinfo_registration("CF", $parameters["CF"])) {
-			// CF Not Found!
-			$return["response"] = "CF Not Found";
-			http_response_code(200);
-			exit (json_encode($return));	
-		}
-	} else {
-		// Check Username
-		if ($database->check_userinfo_registration("username", $parameters["username"])) {
-			// Username Not Found!
-			$return["response"] = "Username Not Found";
-			http_response_code(200);
-			exit (json_encode($return));	
-		}
-	}
+	$areas = json_decode($_POST["areas"]);
+	echo json_encode($areas);
+
+	exit();
+
+	// // Check CF or Username
+	// if ($parameters["CF"] != "") {
+	// 	// Check CF
+	// 	if ($database->check_userinfo_registration("CF", $parameters["CF"])) {
+	// 		// CF Not Found!
+	// 		$return["response"] = "CF Not Found";
+	// 		http_response_code(200);
+	// 		exit (json_encode($return));	
+	// 	}
+	// }
 
 	// Check if the Badge Exist
 	if ($database->get_badge_info($parameters["badge"], $my_businessid)["return"]) {
